@@ -1,4 +1,4 @@
-name: 'Node'
+name: "Node"
 
 on:
   push:
@@ -6,6 +6,10 @@ on:
 jobs:
   run:
     runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SUPABASE_JWT_SECRET: ${{ secrets.SUPABASE_JWT_SECRET }}
     steps:
       - name: Checkout 🛬
         uses: actions/checkout@v4
