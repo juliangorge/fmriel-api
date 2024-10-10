@@ -5,6 +5,7 @@ import {
   FastifyAdapter,
   NestFastifyApplication,
 } from "@nestjs/platform-fastify";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 
 import { AppModule } from "@/app/app.module";
 
@@ -17,6 +18,16 @@ async function bootstrap() {
   app.setGlobalPrefix("api");
   const configService = app.get(ConfigService);
   const port = configService.get<string>("PORT", "3000");
+
+  const config = new DocumentBuilder()
+    .setTitle("FM Riel API")
+    .setVersion("1.0")
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup("api", app, document);
+
+  app.enableCors();
 
   await app.listen(port, "0.0.0.0");
 
