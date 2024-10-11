@@ -1,0 +1,13 @@
+diff --git a/node_modules/nestjs-supabase-auth/dist/passport-supabase.strategy.js b/node_modules/nestjs-supabase-auth/dist/passport-supabase.strategy.js
+index 0273ebc..a191801 100644
+--- a/node_modules/nestjs-supabase-auth/dist/passport-supabase.strategy.js
++++ b/node_modules/nestjs-supabase-auth/dist/passport-supabase.strategy.js
+@@ -23,7 +23,7 @@ class SupabaseAuthStrategy extends passport_strategy_1.Strategy {
+             this.fail(constants_1.UNAUTHORIZED, 401);
+             return;
+         }
+-        this.supabase.auth.api
++        this.supabase.auth
+             .getUser(idToken)
+             .then((res) => this.validateSupabaseResponse(res))
+             .catch((err) => {
