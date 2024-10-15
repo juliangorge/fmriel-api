@@ -11,11 +11,11 @@ export class PostService extends BaseService<Post> {
     super(postRepository);
   }
 
-  async getMainFeatured(): Promise<Post[]> {
-    return await this.postRepository.findAll();
+  async getHighlights(): Promise<Post[]> {
+    return await this.postRepository.findHighlights();
   }
 
-  async getFeatured(): Promise<Post[]> {
-    return await this.postRepository.findFeatured();
+  async getMainFeatured(): Promise<Post[]> {
+    return await this.postRepository.findAll();
   }
 }

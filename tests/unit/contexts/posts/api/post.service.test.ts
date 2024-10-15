@@ -40,12 +40,4 @@ describe("PostService", () => {
     const response = await service.getById(1);
     expect(response).toBe(mock);
   });
-
-  it("should return featured", async () => {
-    const mock = [PostMock];
-    mockPostRepository.findFeatured.mockReturnValue(mock);
-
-    const response = await service.getFeatured();
-    expect(response).toBe(mock);
-  });
 });

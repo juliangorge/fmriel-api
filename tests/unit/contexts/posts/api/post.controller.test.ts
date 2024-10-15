@@ -45,17 +45,4 @@ describe("PostController", () => {
       expect(response).toEqual(mockPost);
     });
   });
-
-  describe("getFeatured", () => {
-    it("should return a list of featured posts", async () => {
-      const mockFeaturedPosts = [PostMock];
-
-      vi.spyOn(service, "getFeatured").mockImplementation(() =>
-        Promise.resolve(mockFeaturedPosts),
-      );
-
-      const response = await controller.getFeatured();
-      expect(response).toEqual(mockFeaturedPosts);
-    });
-  });
 });

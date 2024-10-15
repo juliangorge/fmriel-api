@@ -21,11 +21,11 @@ export class PostRepository extends BaseRepository<Post> {
     return data as Post;
   }
 
-  async findFeatured(): Promise<Post[]> {
+  async findHighlights(): Promise<Post[]> {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select("*, post_sections(name)")
-      .order("created_at", { ascending: false });
+      .select("*, post_sections(name), highlight_posts(*)");
+    //.order("created_at", { ascending: false });
     if (error)
       throw new Error(`Error fetching featured posts: ${error.message}`);
     return data as Post[];

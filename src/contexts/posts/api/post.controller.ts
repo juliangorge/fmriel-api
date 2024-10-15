@@ -26,6 +26,17 @@ export class PostController {
 
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(3600) // 1 hour
+  @Get("highlights")
+  async getHighlights() {
+    const posts = await this.service.getHighlights();
+    if (!posts) {
+      throw new NotFoundException();
+    }
+    return posts;
+  }
+
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(3600) // 1 hour
   @Get(":id")
   async getById(@Param("id") id: string) {
     const postId = Number.parseInt(id, 10);
@@ -41,12 +52,5 @@ export class PostController {
   @Get("mainFeatured")
   getMainFeatured() {
     return this.service.getMainFeatured();
-  }
-
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(3600) // 1 hour
-  @Get("featured")
-  getFeatured() {
-    return this.service.getFeatured();
   }
 }
