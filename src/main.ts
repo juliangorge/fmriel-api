@@ -22,6 +22,13 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle("FM Riel API")
     .setVersion("1.0")
+    .addBearerAuth(
+      {
+        type: "http",
+        scheme: "bearer",
+      },
+      "access-token",
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

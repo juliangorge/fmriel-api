@@ -1,6 +1,7 @@
 import { Body, Controller, Post } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
+import { SignInDto } from "./auth.dto";
 import { AuthService } from "./auth.service";
 
 @Controller("auth")
@@ -13,7 +14,7 @@ export class AuthController {
     summary: "Acquires an access token",
     description: "This endpoint will provide an access token.",
   })
-  async signIn(@Body() dto: { email: string; password: string }) {
+  async signIn(@Body() dto: SignInDto) {
     return this.authService.signInUser(dto);
   }
 }
