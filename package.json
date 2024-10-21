@@ -50,7 +50,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-fastify": "^10.4.5",
     "@nestjs/swagger": "^7.4.2",
-    "@supabase/supabase-js": "^2.45.4",
+    "@supabase/supabase-js": "^2.45.6",
     "cache-manager": "^5.7.6",
     "nestjs-supabase-auth": "^1.0.9",
     "passport": "^0.7.0",
