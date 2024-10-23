@@ -1,88 +1,145 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable unicorn/no-null */
-import { Test, TestingModule } from "@nestjs/testing";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
-import { PostSectionMock } from "@/tests/utils/mocks/post-section";
-
+import { PostSection } from "@/src/contexts/postSections/api/post-section.model";
 import { PostSectionRepository } from "@/src/contexts/postSections/api/post-section.repository";
+
+import { SupabaseProvider } from "@/shared/supabase/supabase.provider";
 
 describe("PostSectionRepository", () => {
   let repository: PostSectionRepository;
   let supabaseMock: SupabaseClient;
+  let supabaseProviderMock: SupabaseProvider;
+  const tableName = "post_sections";
 
-  beforeEach(async () => {
+  let selectMock: Mock;
+
+  beforeEach(() => {
+    // Mock SupabaseClient methods
+    selectMock = vi.fn().mockResolvedValue({
+      data: [],
+      error: null,
+    });
+
     supabaseMock = {
-      from: vi.fn(),
+      from: vi.fn(() => ({
+        select: selectMock,
+      })),
     } as unknown as SupabaseClient;
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        PostSectionRepository,
-        { provide: SupabaseClient, useValue: supabaseMock }, // Provide the mock SupabaseClient
-      ],
-    }).compile();
+    // Mock SupabaseProvider to return the mock SupabaseClient
+    supabaseProviderMock = {
+      getClient: vi.fn().mockReturnValue(supabaseMock),
+    } as unknown as SupabaseProvider;
 
-    repository = module.get<PostSectionRepository>(PostSectionRepository);
+    // Initialize the repository with the mock provider
+    repository = new PostSectionRepository(supabaseProviderMock);
   });
 
   afterEach(() => {
-    vi.clearAllMocks();
+    vi.clearAllMocks(); // Clear mocks after each test
   });
 
-  // eslint-disable-next-line vitest/no-commented-out-tests
-  /*
-  it("should fetch successfully", async () => {
-    // Mock the Supabase query chain
-    const mockSelect = vi.fn().mockReturnValue({
-      eq: vi.fn().mockResolvedValue({
-        data: PostSectionMock,
-        error: null,
+  it("should fetch all posts in getAll", async () => {
+    const mockData: PostSection[] = [
+      {
+        id: 1,
+        name: "Culture",
+      },
+      {
+        id: 2,
+        name: "Sports",
+      },
+    ];
+
+    selectMock.mockResolvedValueOnce({
+      data: mockData,
+      error: null,
+    });
+
+    const result = await repository.getAll();
+
+    expect(result).toEqual(mockData);
+
+    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+    expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
+  });
+
+  it("should throw an error when getAll fails", async () => {
+    const mockError = { message: "Failed to fetch data" };
+    selectMock.mockResolvedValueOnce({
+      data: null,
+      error: mockError,
+    });
+
+    await expect(repository.getAll()).rejects.toThrow(
+      "Error fetching data: Failed to fetch data",
+    );
+
+    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+    expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
+  });
+
+  it("should fetch a post by ID in getById", async () => {
+    const mockPostSection: PostSection = {
+      id: 1,
+      name: "Culture",
+    };
+
+    (supabaseMock.from as Mock).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          maybeSingle: vi.fn().mockResolvedValueOnce({
+            data: mockPostSection,
+            error: null,
+          }),
+        }),
       }),
     });
 
-    (supabaseMock.from as Mock).mockReturnValue({
-      select: mockSelect,
-    });
+    const result = await repository.getById(1);
 
-    const result = await repository.findAll();
+    expect(result).toEqual(mockPostSection);
 
-    expect(supabaseMock.from).toHaveBeenCalledWith("post_sections");
-    expect(supabaseMock.from("post_sections").select).toHaveBeenCalled();
-    expect(result).toEqual(PostSectionMock);
+    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+    expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
+    expect(supabaseMock.from(tableName).select().eq).toHaveBeenCalledWith(
+      "id",
+      1,
+    );
+    expect(
+      supabaseMock.from(tableName).select().eq("id", 1).maybeSingle,
+    ).toHaveBeenCalled();
   });
 
-  it("should throw an error when fetching fails", async () => {
+  it("should throw an error when getById fails", async () => {
     const mockError = { message: "Failed to fetch data" };
 
     (supabaseMock.from as Mock).mockReturnValue({
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
           maybeSingle: vi.fn().mockResolvedValueOnce({
-            data: {
-              id: 1,
-              title: "Post Section 1",
-            },
+            data: null,
             error: mockError,
           }),
         }),
       }),
     });
 
-    await expect(repository.findById(1)).rejects.toThrow(
+    await expect(repository.getById(1)).rejects.toThrow(
       "Error fetching data: Failed to fetch data",
     );
 
-    expect(supabaseMock.from).toHaveBeenCalledWith("post_sections");
-    expect(supabaseMock.from("post_sections").select).toHaveBeenCalledWith();
-    expect(supabaseMock.from("post_sections").select().eq).toHaveBeenCalledWith(
+    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+    expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
+    expect(supabaseMock.from(tableName).select().eq).toHaveBeenCalledWith(
       "id",
       1,
     );
     expect(
-      supabaseMock.from("post_sections").select().eq("id", 1).maybeSingle,
+      supabaseMock.from(tableName).select().eq("id", 1).maybeSingle,
     ).toHaveBeenCalled();
   });
-   */
 });

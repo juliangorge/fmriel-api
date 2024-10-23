@@ -1,4 +1,4 @@
-export const MainFeaturedPostMock = {
+export const MainHighlightPostMock = {
   post_id: 1,
   created_at: new Date(),
   title: "Post Title",
