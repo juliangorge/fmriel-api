@@ -26,7 +26,7 @@ export class PostRepository extends BaseRepository<Post> {
   async getHighlights(): Promise<Post[]> {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select("*, post_sections(name), highlight_posts(*)");
+      .select("*, post_sections(name)");
     //.order("created_at", { ascending: false });
     if (error) throw new Error(`Error fetching data: ${error.message}`);
     return data as Post[];
@@ -34,10 +34,11 @@ export class PostRepository extends BaseRepository<Post> {
 
   async getMainHighlights(): Promise<Post[]> {
     const { data, error } = await this.supabase
-      .from(this.tableName)
-      .select("*, post_sections(name), highlight_posts(*)");
-    //.order("created_at", { ascending: false });
+      .from("highlight_posts")
+      .select("posts(*, post_sections(name))");
+
     if (error) throw new Error(`Error fetching data: ${error.message}`);
-    return data as Post[];
+
+    return (data as unknown as { posts: Post }[]).map(item => item.posts);
   }
 }

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
 import { SupabaseProvider } from "@/shared/supabase/supabase.provider";
 
@@ -42,7 +42,7 @@ describe("BaseService", () => {
 
       // Mock the getAll method of the repository
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      (repositoryMock.getAll as unknown as vi.Mock).mockResolvedValue(
+      (repositoryMock.getAll as unknown as Mock).mockResolvedValue(
         mockEntities,
       );
 
@@ -60,9 +60,7 @@ describe("BaseService", () => {
 
       // Mock the getById method of the repository
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      (repositoryMock.getById as unknown as vi.Mock).mockResolvedValue(
-        mockEntity,
-      );
+      (repositoryMock.getById as unknown as Mock).mockResolvedValue(mockEntity);
 
       const result = await baseService.getById(1);
       expect(result).toEqual(mockEntity);

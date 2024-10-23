@@ -165,7 +165,7 @@ describe("PostRepository", () => {
   });
 
   it("should fetch all main highlighted posts in getMainHighlights", async () => {
-    const mockData: Post[] = [PostMock, PostMock];
+    const mockData = [{ posts: PostMock }, { posts: PostMock }];
 
     selectMock.mockResolvedValueOnce({
       data: mockData,
@@ -174,10 +174,11 @@ describe("PostRepository", () => {
 
     const result = await repository.getMainHighlights();
 
-    expect(result).toEqual(mockData);
+    const sanitizedPosts = mockData.map(item => item.posts);
+    expect(result).toEqual(sanitizedPosts);
 
-    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-    expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
+    expect(supabaseMock.from).toHaveBeenCalledWith("highlight_posts");
+    expect(supabaseMock.from("highlight_posts").select).toHaveBeenCalled();
   });
 
   it("should throw an error when getMainHighlights fails", async () => {
@@ -191,7 +192,7 @@ describe("PostRepository", () => {
       "Error fetching data: Failed to fetch data",
     );
 
-    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-    expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
+    expect(supabaseMock.from).toHaveBeenCalledWith("highlight_posts");
+    expect(supabaseMock.from("highlight_posts").select).toHaveBeenCalled();
   });
 });
