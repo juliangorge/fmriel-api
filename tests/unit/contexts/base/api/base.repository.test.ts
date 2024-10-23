@@ -16,12 +16,23 @@ describe("BaseRepository", () => {
   let repository: BaseRepository<TestEntity>;
   let supabaseMock: SupabaseClient;
   let supabaseProviderMock: SupabaseProvider;
-  const tableName = "test_table"; // Table name constant
+  const tableName = "test_table";
 
   let selectMock: Mock;
+  let insertMock: Mock;
+  let updateMock: Mock;
 
   beforeEach(() => {
-    // Mock SupabaseClient methods
+    insertMock = vi.fn().mockResolvedValue({
+      data: [],
+      error: null,
+    });
+
+    updateMock = vi.fn().mockResolvedValue({
+      data: [],
+      error: null,
+    });
+
     selectMock = vi.fn().mockResolvedValue({
       data: [],
       error: null,
@@ -29,6 +40,8 @@ describe("BaseRepository", () => {
 
     supabaseMock = {
       from: vi.fn(() => ({
+        insert: insertMock,
+        update: updateMock,
         select: selectMock,
       })),
     } as unknown as SupabaseClient;
@@ -139,5 +152,103 @@ describe("BaseRepository", () => {
     expect(
       supabaseMock.from(tableName).select().eq("id", 1).maybeSingle,
     ).toHaveBeenCalled();
+  });
+
+  it("should create a new record in create", async () => {
+    const newEntity = { name: "New Entity" };
+
+    const mockCreatedData = { id: 1, name: "New Entity" };
+    (supabaseMock.from as Mock).mockReturnValue({
+      insert: vi.fn().mockReturnValue({
+        select: vi.fn().mockResolvedValueOnce({
+          data: mockCreatedData,
+          error: null,
+        }),
+      }),
+    });
+
+    const result = await repository.create(newEntity);
+
+    expect(result).toEqual(mockCreatedData);
+
+    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+    expect(supabaseMock.from(tableName).insert).toHaveBeenCalledWith(newEntity);
+  });
+
+  it("should throw an error when create fails", async () => {
+    const newEntity = { name: "New Entity" };
+
+    const mockError = { message: "Error creating data" };
+
+    (supabaseMock.from as Mock).mockReturnValue({
+      insert: vi.fn().mockReturnValue({
+        select: vi.fn().mockResolvedValueOnce({
+          data: null,
+          error: mockError,
+        }),
+      }),
+    });
+
+    await expect(repository.create(newEntity)).rejects.toThrow(
+      "Error creating data: Error creating data",
+    );
+
+    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+    expect(supabaseMock.from(tableName).insert).toHaveBeenCalledWith(newEntity);
+  });
+
+  it("should update a record in update", async () => {
+    const mockUpdatedData = { id: 1, name: "Updated Entity" };
+
+    (supabaseMock.from as Mock).mockReturnValue({
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          select: vi.fn().mockResolvedValueOnce({
+            data: mockUpdatedData,
+            error: null,
+          }),
+        }),
+      }),
+    });
+
+    const result = await repository.update(1, { name: "Updated Entity" });
+
+    expect(result).toEqual(mockUpdatedData);
+
+    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+    expect(supabaseMock.from(tableName).update).toHaveBeenCalledWith({
+      name: "Updated Entity",
+    });
+    expect(
+      supabaseMock.from(tableName).update(mockUpdatedData).eq,
+    ).toHaveBeenCalledWith("id", 1);
+  });
+
+  it("should throw an error when update fails", async () => {
+    const mockError = { message: "Error updating data" };
+    const mockUpdatedData = { name: "Updated Entity" };
+
+    (supabaseMock.from as Mock).mockReturnValue({
+      update: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          select: vi.fn().mockResolvedValueOnce({
+            data: null,
+            error: mockError,
+          }),
+        }),
+      }),
+    });
+
+    await expect(repository.update(1, mockUpdatedData)).rejects.toThrow(
+      "Error updating data: Error updating data",
+    );
+
+    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+    expect(supabaseMock.from(tableName).update).toHaveBeenCalledWith({
+      name: "Updated Entity",
+    });
+    expect(
+      supabaseMock.from(tableName).update(mockUpdatedData).eq,
+    ).toHaveBeenCalledWith("id", 1);
   });
 });
