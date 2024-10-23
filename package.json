@@ -24,7 +24,7 @@
   },
   "main": "dist/main.js",
   "scripts": {
-    "build": "npx patch-package && npm run build:clean && nest build --path tsconfig.prod.json",
+    "build": "npm run build:clean && nest build --path tsconfig.prod.json",
     "start": "node dist/main.js",
     "dev": "nest start --watch --debug=0.0.0.0:9229",
     "vitest": "vitest",
@@ -38,7 +38,8 @@
     "lint:fix": "npm run lint -- --fix",
     "lint:yaml": "chmod +x scripts/lint_yaml.sh && ./scripts/lint_yaml.sh",
     "build:clean": "rimraf dist; exit 0",
-    "typos": "chmod +x scripts/check_typos.sh && ./scripts/check_typos.sh"
+    "typos": "chmod +x scripts/check_typos.sh && ./scripts/check_typos.sh",
+    "postinstall": "npx patch-package"
   },
   "dependencies": {
     "@fastify/static": "^7.0.4",
