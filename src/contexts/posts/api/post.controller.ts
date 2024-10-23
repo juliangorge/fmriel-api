@@ -17,7 +17,7 @@ import { PostService } from "./post.service";
 @UseGuards(SupabaseAuthGuard)
 @ApiBearerAuth("access-token")
 export class PostController {
-  constructor(private readonly service: PostService) {}
+  constructor(protected readonly service: PostService) {}
 
   @Get()
   getAll() {

@@ -11,7 +11,7 @@ import { PostSectionRepository } from "./post-section.repository";
 export class PostSectionService extends BaseService<PostSection> {
   constructor(
     protected readonly supabaseProvider: SupabaseProvider,
-    private readonly postSectionRepository: PostSectionRepository,
+    protected readonly postSectionRepository: PostSectionRepository,
   ) {
     super(supabaseProvider, postSectionRepository);
   }

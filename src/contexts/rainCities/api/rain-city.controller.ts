@@ -17,7 +17,7 @@ import { RainCityService } from "./rain-city.service";
 @ApiTags("Rain Cities")
 @ApiBearerAuth("access-token")
 export class RainCityController {
-  constructor(private readonly rainCityService: RainCityService) {}
+  constructor(protected readonly rainCityService: RainCityService) {}
 
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(3600 * 24) // 24 hours

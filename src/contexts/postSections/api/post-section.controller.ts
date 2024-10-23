@@ -8,7 +8,7 @@ import { PostSectionService } from "./post-section.service";
 @ApiTags("Post Sections")
 @ApiBearerAuth("access-token")
 export class PostSectionController {
-  constructor(private readonly postSectionService: PostSectionService) {}
+  constructor(protected readonly postSectionService: PostSectionService) {}
 
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(3600 * 24) // 24 hours
