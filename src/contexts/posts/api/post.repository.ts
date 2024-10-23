@@ -1,16 +1,18 @@
 import { Injectable } from "@nestjs/common";
 
+import { SupabaseProvider } from "@/shared/supabase/supabase.provider";
+
 import { BaseRepository } from "@/contexts/base/api/base.repository";
 
 import { Post } from "./post.model";
 
 @Injectable()
 export class PostRepository extends BaseRepository<Post> {
-  constructor() {
-    super("posts");
+  constructor(protected supabaseProvider: SupabaseProvider) {
+    super(supabaseProvider, "posts");
   }
 
-  async findById(id: number): Promise<Post> {
+  async getById(id: number): Promise<Post> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { data, error } = await this.supabase
       .from(this.tableName)
@@ -21,13 +23,21 @@ export class PostRepository extends BaseRepository<Post> {
     return data as Post;
   }
 
-  async findHighlights(): Promise<Post[]> {
+  async getHighlights(): Promise<Post[]> {
     const { data, error } = await this.supabase
       .from(this.tableName)
       .select("*, post_sections(name), highlight_posts(*)");
     //.order("created_at", { ascending: false });
-    if (error)
-      throw new Error(`Error fetching featured posts: ${error.message}`);
+    if (error) throw new Error(`Error fetching data: ${error.message}`);
+    return data as Post[];
+  }
+
+  async getMainHighlights(): Promise<Post[]> {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select("*, post_sections(name), highlight_posts(*)");
+    //.order("created_at", { ascending: false });
+    if (error) throw new Error(`Error fetching data: ${error.message}`);
     return data as Post[];
   }
 }

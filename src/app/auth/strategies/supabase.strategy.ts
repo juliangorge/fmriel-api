@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Injectable } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
-import { User } from "@supabase/supabase-js";
-import { SupabaseAuthStrategy } from "nestjs-supabase-auth";
+import { SupabaseAuthStrategy, SupabaseAuthUser } from "nestjs-supabase-auth";
 import { ExtractJwt } from "passport-jwt";
 
 @Injectable()
@@ -21,15 +18,18 @@ export class SupabaseStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: User): Promise<any> {
-    // console.log("in validate");
-    const res = super.validate(payload);
-    return res;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  checkIfUserIsValid(res: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (!res || res?.user === null) {
+      throw new UnauthorizedException();
+    }
   }
 
-  authenticate(req: any) {
-    // console.log("in authenticate");
-    const res = super.authenticate(req);
+  async validate(payload: SupabaseAuthUser): Promise<SupabaseAuthUser> {
+    const res = await super.validate(payload);
+    this.checkIfUserIsValid(res);
+
     return res;
   }
 }

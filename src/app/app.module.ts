@@ -9,6 +9,7 @@ import { LoggerModule } from "@/shared/logger/logger.module";
 
 import { PostModule } from "@/contexts/posts/post.module";
 import { PostSectionModule } from "@/contexts/postSections/post-section.module";
+import { RainCityModule } from "@/contexts/rainCities/rain-city.module";
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PostSectionModule } from "@/contexts/postSections/post-section.module";
     HealthModule,
     PostModule,
     PostSectionModule,
+    RainCityModule,
   ],
 })
 export class AppModule {}

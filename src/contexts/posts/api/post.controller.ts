@@ -49,8 +49,8 @@ export class PostController {
 
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(3600) // 1 hour
-  @Get("mainFeatured")
-  getMainFeatured() {
-    return this.service.getMainFeatured();
+  @Get("mainHighlights")
+  getMainHighlights() {
+    return this.service.getMainHighlights();
   }
 }

@@ -3,7 +3,9 @@ import {
   AuthTokenResponsePassword,
   SupabaseClient,
 } from "@supabase/supabase-js";
-import { beforeEach, describe, expect, it, Mock, Mocked, vi } from "vitest";
+import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
+
+import { SupabaseProvider } from "@/src/contexts/shared/supabase/supabase.provider";
 
 import { AuthService } from "@/app/auth/auth.service";
 
@@ -13,19 +15,24 @@ vi.stubEnv("SUPABASE_KEY", "some-key");
 
 describe("AuthService", () => {
   let authService: AuthService;
-  let supabaseMock: Mocked<SupabaseClient>;
+  let supabaseMock: SupabaseClient;
+  let supabaseProviderMock: SupabaseProvider;
 
   beforeEach(() => {
-    // Mock the Supabase client and its auth.signInWithPassword function
+    // Mock the SupabaseClient and its auth.signInWithPassword function
     supabaseMock = {
       auth: {
-        signInWithPassword: vi.fn(), // Override the method explicitly with vi.fn()
+        signInWithPassword: vi.fn(), // Mock signInWithPassword
       },
-    } as unknown as Mocked<SupabaseClient>;
+    } as unknown as SupabaseClient;
 
-    // Initialize the service with the mocked Supabase client
-    authService = new AuthService();
-    authService["supabaseClient"] = supabaseMock; // Inject the mock directly into the service
+    // Mock SupabaseProvider to return the mocked SupabaseClient
+    supabaseProviderMock = {
+      getClient: vi.fn().mockReturnValue(supabaseMock),
+    } as unknown as SupabaseProvider;
+
+    // Initialize the AuthService with the mocked SupabaseProvider
+    authService = new AuthService(supabaseProviderMock);
   });
 
   it("should sign in the user and return user data and session", async () => {
@@ -42,20 +49,20 @@ describe("AuthService", () => {
 
     const mockDto = { email: "test@example.com", password: "password123" };
 
-    // Mock the signInWithPassword function to return a successful response
+    // Mock the signInWithPassword method to return a successful response
     (supabaseMock.auth.signInWithPassword as Mock).mockResolvedValueOnce(
       mockResponse as AuthTokenResponsePassword,
     );
 
     const result = await authService.signInUser(mockDto);
 
-    // Ensure the mock is called with the correct DTO
+    // Ensure the mock is called with the correct arguments
     expect(supabaseMock.auth.signInWithPassword).toHaveBeenCalledWith({
       email: mockDto.email,
       password: mockDto.password,
     });
 
-    // Ensure the result matches the mock response
+    // Ensure the result matches the expected mock response
     expect(result).toEqual({
       user: mockResponse.data.user,
       session: mockResponse.data.session,
@@ -72,14 +79,14 @@ describe("AuthService", () => {
 
     const mockDto = { email: "test@example.com", password: "wrong-password" };
 
-    // Mock the signInWithPassword function to return an error
+    // Mock the signInWithPassword method to return an error
     (supabaseMock.auth.signInWithPassword as Mock).mockResolvedValueOnce(
       mockResponse as AuthTokenResponsePassword,
     );
 
     const result = await authService.signInUser(mockDto);
 
-    // Ensure the mock is called with the correct DTO
+    // Ensure the mock is called with the correct arguments
     expect(supabaseMock.auth.signInWithPassword).toHaveBeenCalledWith({
       email: mockDto.email,
       password: mockDto.password,
