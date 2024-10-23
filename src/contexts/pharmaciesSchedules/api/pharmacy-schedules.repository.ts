@@ -1,13 +1,15 @@
 import { Injectable } from "@nestjs/common";
 
+import { SupabaseProvider } from "@/shared/supabase/supabase.provider";
+
 import { BaseRepository } from "@/contexts/base/api/base.repository";
 
 import { PharmacySchedule } from "./pharmacy-schedules.model";
 
 @Injectable()
 export class PharmacyScheduleRepository extends BaseRepository<PharmacySchedule> {
-  constructor() {
-    super("pharmacy_schedules");
+  constructor(protected supabaseProvider: SupabaseProvider) {
+    super(supabaseProvider, "pharmacy_schedules");
   }
 
   async create(pharmacySchedule: PharmacySchedule): Promise<PharmacySchedule> {

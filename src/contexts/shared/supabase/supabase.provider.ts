@@ -6,7 +6,7 @@ import { createClient, SupabaseClient } from "@supabase/supabase-js";
 export class SupabaseProvider {
   private supabase: SupabaseClient;
 
-  constructor(@Inject(REQUEST) private readonly request: Request) {
+  constructor(@Inject(REQUEST) protected readonly request: Request) {
     const supabaseUrl = process.env.SUPABASE_URL!;
     const supabaseKey = process.env.SUPABASE_KEY!;
 

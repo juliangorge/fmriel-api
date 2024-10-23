@@ -11,7 +11,7 @@ import { RainCityRepository } from "./rain-city.repository";
 export class RainCityService extends BaseService<RainCity> {
   constructor(
     protected readonly supabaseProvider: SupabaseProvider,
-    private readonly rainCityRepository: RainCityRepository,
+    protected readonly rainCityRepository: RainCityRepository,
   ) {
     super(supabaseProvider, rainCityRepository);
   }

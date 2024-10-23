@@ -15,7 +15,7 @@ import { PharmacyScheduleService } from "./pharmacy-schedules.service";
 
 @Controller("pharmacy_schedules")
 export class PharmacyScheduleController {
-  constructor(private readonly service: PharmacyScheduleService) {}
+  constructor(protected readonly service: PharmacyScheduleService) {}
 
   @Get()
   async getAll(): Promise<pharmacyScheduleModel.PharmacySchedule[]> {

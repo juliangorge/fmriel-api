@@ -21,7 +21,7 @@ import { PharmacyService } from "./pharmacy.service";
 @UseGuards(SupabaseAuthGuard)
 @ApiBearerAuth("access-token")
 export class PharmacyController {
-  constructor(private readonly service: PharmacyService) {}
+  constructor(protected readonly service: PharmacyService) {}
 
   @Get()
   getAll() {
