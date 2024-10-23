@@ -24,7 +24,7 @@
   },
   "main": "dist/main.js",
   "scripts": {
-    "build": "npm run build:clean && nest build --path tsconfig.prod.json",
+    "build": "npx patch-package && npm run build:clean && nest build --path tsconfig.prod.json",
     "start": "node dist/main.js",
     "dev": "nest start --watch --debug=0.0.0.0:9229",
     "vitest": "vitest",
