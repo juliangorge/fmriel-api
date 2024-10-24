@@ -15,12 +15,4 @@ export class PharmacyService extends BaseService<Pharmacy> {
   ) {
     super(supabaseProvider, pharmacyRepository);
   }
-
-  async create(pharmacy: Pharmacy): Promise<Pharmacy> {
-    return await this.pharmacyRepository.create(pharmacy);
-  }
-
-  async update(id: number, pharmacy: Pharmacy): Promise<Pharmacy> {
-    return await this.pharmacyRepository.update(id, pharmacy);
-  }
 }
