@@ -16,23 +16,8 @@ export class PharmacyScheduleService extends BaseService<PharmacySchedule> {
     super(supabaseProvider, repository);
   }
 
-  async getAll(): Promise<PharmacySchedule[]> {
-    return this.repository.getAll();
-  }
-
   async getByDate(date: Date): Promise<PharmacySchedule[]> {
     return this.repository.getByDate(date);
-  }
-
-  async create(pharmacySchedule: PharmacySchedule): Promise<PharmacySchedule> {
-    return this.repository.create(pharmacySchedule);
-  }
-
-  async update(
-    id: number,
-    pharmacySchedule: Partial<PharmacySchedule>,
-  ): Promise<PharmacySchedule> {
-    return this.repository.update(id, pharmacySchedule);
   }
 
   async delete(id: number): Promise<void> {
