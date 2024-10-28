@@ -2,6 +2,7 @@ import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -50,5 +51,10 @@ export class RainCityController {
   ) {
     const rainCityId = Number.parseInt(id, 10);
     return this.rainCityService.update(rainCityId, updateRainCityDto);
+  }
+
+  @Delete(":id")
+  delete(@Param("id") id: number) {
+    return this.rainCityService.delete(id);
   }
 }

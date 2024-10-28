@@ -3,18 +3,18 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
-import { PostMock } from "@/tests/utils/mocks/post";
+import { PharmacyScheduleMock } from "@/tests/utils/mocks/pharmacy-schedule";
 
-import { Post } from "@/src/contexts/posts/api/post.model";
-import { PostRepository } from "@/src/contexts/posts/api/post.repository";
+import { PharmacySchedule } from "@/src/contexts/pharmacySchedules/api/pharmacy-schedule.model";
+import { PharmacyScheduleRepository } from "@/src/contexts/pharmacySchedules/api/pharmacy-schedule.repository";
 
 import { SupabaseProvider } from "@/shared/supabase/supabase.provider";
 
-describe("PostRepository", () => {
-  let repository: PostRepository;
+describe("PharmacyScheduleRepository", () => {
+  let repository: PharmacyScheduleRepository;
   let supabaseMock: SupabaseClient;
   let supabaseProviderMock: SupabaseProvider;
-  const tableName = "posts";
+  const tableName = "pharmacy_schedules";
 
   let selectMock: Mock;
 
@@ -37,7 +37,7 @@ describe("PostRepository", () => {
     } as unknown as SupabaseProvider;
 
     // Initialize the repository with the mock provider
-    repository = new PostRepository(supabaseProviderMock);
+    repository = new PharmacyScheduleRepository(supabaseProviderMock);
   });
 
   afterEach(() => {
@@ -45,7 +45,7 @@ describe("PostRepository", () => {
   });
 
   it("should fetch all records in getAll", async () => {
-    const mockData: Post[] = [PostMock, PostMock];
+    const mockData = [PharmacyScheduleMock] as PharmacySchedule[];
 
     selectMock.mockResolvedValueOnce({
       data: mockData,
@@ -75,36 +75,38 @@ describe("PostRepository", () => {
     expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
   });
 
-  it("should fetch a post by ID in getById", async () => {
-    const mockPost: Post = PostMock;
+  it("should fetch a record by ID in getById", async () => {
+    const mockPharmacySchedule = PharmacyScheduleMock as PharmacySchedule;
 
     (supabaseMock.from as Mock).mockReturnValue({
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
           maybeSingle: vi.fn().mockResolvedValueOnce({
-            data: mockPost,
+            data: mockPharmacySchedule,
             error: null,
           }),
         }),
       }),
     });
 
-    const result = await repository.getById(1);
+    const result = await repository.getById(mockPharmacySchedule.id);
 
-    expect(result).toEqual(mockPost);
+    expect(result).toEqual(mockPharmacySchedule);
 
     expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
     expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
     expect(supabaseMock.from(tableName).select().eq).toHaveBeenCalledWith(
       "id",
-      1,
+      mockPharmacySchedule.id,
     );
     expect(
-      supabaseMock.from(tableName).select().eq("id", 1).maybeSingle,
+      supabaseMock.from(tableName).select().eq("id", mockPharmacySchedule.id)
+        .maybeSingle,
     ).toHaveBeenCalled();
   });
 
   it("should throw an error when getById fails", async () => {
+    const mockId = 1;
     const mockError = { message: "Failed to fetch data" };
 
     (supabaseMock.from as Mock).mockReturnValue({
@@ -118,7 +120,7 @@ describe("PostRepository", () => {
       }),
     });
 
-    await expect(repository.getById(1)).rejects.toThrow(
+    await expect(repository.getById(mockId)).rejects.toThrow(
       "Error fetching data: Failed to fetch data",
     );
 
@@ -126,73 +128,98 @@ describe("PostRepository", () => {
     expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
     expect(supabaseMock.from(tableName).select().eq).toHaveBeenCalledWith(
       "id",
-      1,
+      mockId,
     );
     expect(
-      supabaseMock.from(tableName).select().eq("id", 1).maybeSingle,
+      supabaseMock.from(tableName).select().eq("id", mockId).maybeSingle,
     ).toHaveBeenCalled();
   });
 
-  it("should fetch all highlightedrecordsin getHighlights", async () => {
-    const mockData: Post[] = [PostMock, PostMock];
+  // eslint-disable-next-line vitest/no-commented-out-tests
+  /*
+  it("should fetch records for a specific date in getByDate", async () => {
+    const mockPharmacySchedule = PharmacyScheduleMock as PharmacySchedule;
+    const testDate = new Date("2023-10-15");
 
-    selectMock.mockResolvedValueOnce({
-      data: mockData,
-      error: null,
+    (supabaseMock.from as Mock).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        gte: vi.fn().mockReturnValue({
+          lte: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValueOnce({
+              data: mockPharmacySchedule,
+              error: null,
+            }),
+          }),
+        }),
+      }),
     });
 
-    const result = await repository.getHighlights();
+    const result = await repository.getByDate(testDate);
 
-    expect(result).toEqual(mockData);
+    expect(result).toEqual([PharmacyScheduleMock]);
 
     expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
     expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
+    expect(supabaseMock.from(tableName).select().eq).toHaveBeenCalledWith(
+      "date",
+      testDate.toISOString(),
+    );
   });
 
-  it("should throw an error when getHighlights fails", async () => {
+  it("should throw an error when getByDate fails", async () => {
+    const testDate = new Date("2023-10-15");
     const mockError = { message: "Failed to fetch data" };
-    selectMock.mockResolvedValueOnce({
-      data: null,
-      error: mockError,
+
+    (supabaseMock.from as Mock).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        gte: vi.fn().mockReturnValue({
+          lte: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValueOnce({
+              data: null,
+              error: mockError,
+            }),
+          }),
+        }),
+      }),
     });
 
-    await expect(repository.getHighlights()).rejects.toThrow(
+    await expect(repository.getByDate(testDate)).rejects.toThrow(
       "Error fetching data: Failed to fetch data",
     );
 
     expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
     expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
-  });
-
-  it("should fetch all main highlightedrecordsin getMainHighlights", async () => {
-    const mockData = [{ posts: PostMock }, { posts: PostMock }];
-
-    selectMock.mockResolvedValueOnce({
-      data: mockData,
-      error: null,
-    });
-
-    const result = await repository.getMainHighlights();
-
-    const sanitizedPosts = mockData.map(item => item.posts);
-    expect(result).toEqual(sanitizedPosts);
-
-    expect(supabaseMock.from).toHaveBeenCalledWith("highlight_posts");
-    expect(supabaseMock.from("highlight_posts").select).toHaveBeenCalled();
-  });
-
-  it("should throw an error when getMainHighlights fails", async () => {
-    const mockError = { message: "Failed to fetch data" };
-    selectMock.mockResolvedValueOnce({
-      data: null,
-      error: mockError,
-    });
-
-    await expect(repository.getMainHighlights()).rejects.toThrow(
-      "Error fetching data: Failed to fetch data",
+    expect(supabaseMock.from(tableName).select().eq).toHaveBeenCalledWith(
+      "date",
+      testDate.toISOString(),
     );
-
-    expect(supabaseMock.from).toHaveBeenCalledWith("highlight_posts");
-    expect(supabaseMock.from("highlight_posts").select).toHaveBeenCalled();
   });
+
+  it("should return an empty array if no records found for the date", async () => {
+    const testDate = new Date("2023-12-31");
+
+    (supabaseMock.from as Mock).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        gte: vi.fn().mockReturnValue({
+          lte: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValueOnce({
+              data: [],
+              error: null,
+            }),
+          }),
+        }),
+      }),
+    });
+
+    const result = await repository.getByDate(testDate);
+
+    expect(result).toEqual([]);
+    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+    expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
+    expect(supabaseMock.from(tableName).select().eq).toHaveBeenCalledWith(
+      "date",
+      testDate.toISOString(),
+    );
+  });
+  */
 });

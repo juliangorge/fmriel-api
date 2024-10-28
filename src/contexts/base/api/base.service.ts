@@ -30,9 +30,18 @@ export class BaseService<T extends Identifiable> {
   async update(id: number, data: Partial<Omit<T, "id">>): Promise<T> {
     const entity = await this.repository.getById(id);
     if (!entity) {
-      throw NotFoundException;
+      throw new NotFoundException();
     }
 
     return await this.repository.update(id, data);
+  }
+
+  async delete(id: number): Promise<T> {
+    const entity = await this.repository.getById(id);
+    if (!entity) {
+      throw new NotFoundException();
+    }
+
+    return await this.repository.delete(id);
   }
 }

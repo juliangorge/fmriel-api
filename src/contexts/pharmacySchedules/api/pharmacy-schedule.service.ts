@@ -4,8 +4,8 @@ import { BaseService } from "@/src/contexts/base/api/base.service";
 
 import { SupabaseProvider } from "@/shared/supabase/supabase.provider";
 
-import { PharmacySchedule } from "./pharmacy-schedules.model";
-import { PharmacyScheduleRepository } from "./pharmacy-schedules.repository";
+import { PharmacySchedule } from "./pharmacy-schedule.model";
+import { PharmacyScheduleRepository } from "./pharmacy-schedule.repository";
 
 @Injectable()
 export class PharmacyScheduleService extends BaseService<PharmacySchedule> {
@@ -18,9 +18,5 @@ export class PharmacyScheduleService extends BaseService<PharmacySchedule> {
 
   async getByDate(date: Date): Promise<PharmacySchedule[]> {
     return this.repository.getByDate(date);
-  }
-
-  async delete(id: number): Promise<void> {
-    return this.repository.delete(id);
   }
 }

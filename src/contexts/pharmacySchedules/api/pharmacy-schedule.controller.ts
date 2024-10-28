@@ -10,22 +10,20 @@ import {
   Query,
 } from "@nestjs/common";
 
-import * as pharmacyScheduleModel from "./pharmacy-schedules.model";
-import { PharmacyScheduleService } from "./pharmacy-schedules.service";
+import { PharmacySchedule } from "./pharmacy-schedule.model";
+import { PharmacyScheduleService } from "./pharmacy-schedule.service";
 
 @Controller("pharmacy_schedules")
 export class PharmacyScheduleController {
   constructor(protected readonly service: PharmacyScheduleService) {}
 
   @Get()
-  async getAll(): Promise<pharmacyScheduleModel.PharmacySchedule[]> {
+  async getAll(): Promise<PharmacySchedule[]> {
     return this.service.getAll();
   }
 
   @Get("date")
-  async getByDate(
-    @Query("date") dateStr: string,
-  ): Promise<pharmacyScheduleModel.PharmacySchedule[]> {
+  async getByDate(@Query("date") dateStr: string): Promise<PharmacySchedule[]> {
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(dateStr)) {
       throw new BadRequestException(
@@ -44,21 +42,21 @@ export class PharmacyScheduleController {
 
   @Post()
   async create(
-    @Body() pharmacySchedule: pharmacyScheduleModel.PharmacySchedule,
-  ): Promise<pharmacyScheduleModel.PharmacySchedule> {
+    @Body() pharmacySchedule: PharmacySchedule,
+  ): Promise<PharmacySchedule> {
     return this.service.create(pharmacySchedule);
   }
 
   @Put(":id")
   async update(
     @Param("id") id: number,
-    @Body() pharmacySchedule: Partial<pharmacyScheduleModel.PharmacySchedule>,
-  ): Promise<pharmacyScheduleModel.PharmacySchedule> {
+    @Body() pharmacySchedule: Partial<PharmacySchedule>,
+  ): Promise<PharmacySchedule> {
     return this.service.update(id, pharmacySchedule);
   }
 
   @Delete(":id")
-  async delete(@Param("id") id: number): Promise<void> {
+  async delete(@Param("id") id: number): Promise<PharmacySchedule> {
     return this.service.delete(id);
   }
 }

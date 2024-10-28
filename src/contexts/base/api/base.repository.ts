@@ -24,7 +24,7 @@ export class BaseRepository<T extends Identifiable> {
   async getAll(): Promise<T[]> {
     const { data, error } = await this.supabase.from(this.tableName).select();
     if (error) throw new Error(`Error fetching data: ${error.message}`);
-    return (data as T[]) || [];
+    return data as T[];
   }
 
   async getById(id: number): Promise<T> {
@@ -62,5 +62,19 @@ export class BaseRepository<T extends Identifiable> {
     }
 
     return updatedData as unknown as T;
+  }
+
+  async delete(id: number): Promise<T> {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .delete()
+      .eq("id", id)
+      .select();
+
+    if (error) {
+      throw new Error(`Error deleting data: ${error.message}`);
+    }
+
+    return data as unknown as T;
   }
 }

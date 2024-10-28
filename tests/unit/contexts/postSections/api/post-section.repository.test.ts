@@ -42,7 +42,7 @@ describe("PostSectionRepository", () => {
     vi.clearAllMocks(); // Clear mocks after each test
   });
 
-  it("should fetch all posts in getAll", async () => {
+  it("should fetch all records in getAll", async () => {
     const mockData: PostSection[] = [
       {
         id: 1,
@@ -82,7 +82,7 @@ describe("PostSectionRepository", () => {
     expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
   });
 
-  it("should fetch a post by ID in getById", async () => {
+  it("should fetch a post section by ID in getById", async () => {
     const mockPostSection: PostSection = {
       id: 1,
       name: "Culture",

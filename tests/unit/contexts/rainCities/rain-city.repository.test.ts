@@ -3,53 +3,31 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
-import { SupabaseProvider } from "@/src/contexts/shared/supabase/supabase.provider";
+import { RainCityMock } from "@/tests/utils/mocks/rain-city";
 
-import { BaseRepository } from "@/contexts/base/api/base.repository";
+import { RainCity } from "@/src/contexts/rainCities/api/rain-city.model";
+import { RainCityRepository } from "@/src/contexts/rainCities/api/rain-city.repository";
 
-interface TestEntity {
-  id: number;
-  name: string;
-}
+import { SupabaseProvider } from "@/shared/supabase/supabase.provider";
 
-describe("BaseRepository", () => {
-  let repository: BaseRepository<TestEntity>;
+describe("RainCityRepository", () => {
+  let repository: RainCityRepository;
   let supabaseMock: SupabaseClient;
   let supabaseProviderMock: SupabaseProvider;
-  const tableName = "test_table";
+  const tableName = "rain_cities";
 
   let selectMock: Mock;
-  let insertMock: Mock;
-  let updateMock: Mock;
-  let deleteMock: Mock;
 
   beforeEach(() => {
-    insertMock = vi.fn().mockResolvedValue({
-      data: [],
-      error: null,
-    });
-
-    updateMock = vi.fn().mockResolvedValue({
-      data: [],
-      error: null,
-    });
-
+    // Mock SupabaseClient methods
     selectMock = vi.fn().mockResolvedValue({
-      data: [],
-      error: null,
-    });
-
-    deleteMock = vi.fn().mockResolvedValue({
       data: [],
       error: null,
     });
 
     supabaseMock = {
       from: vi.fn(() => ({
-        insert: insertMock,
-        update: updateMock,
         select: selectMock,
-        delete: deleteMock,
       })),
     } as unknown as SupabaseClient;
 
@@ -59,10 +37,7 @@ describe("BaseRepository", () => {
     } as unknown as SupabaseProvider;
 
     // Initialize the repository with the mock provider
-    repository = new BaseRepository<TestEntity>(
-      supabaseProviderMock,
-      tableName,
-    );
+    repository = new RainCityRepository(supabaseProviderMock);
   });
 
   afterEach(() => {
@@ -70,10 +45,7 @@ describe("BaseRepository", () => {
   });
 
   it("should fetch all records in getAll", async () => {
-    const mockData = [
-      { id: 1, name: "Entity 1" },
-      { id: 2, name: "Entity 2" },
-    ];
+    const mockData = [RainCityMock] as RainCity[];
 
     selectMock.mockResolvedValueOnce({
       data: mockData,
@@ -104,35 +76,37 @@ describe("BaseRepository", () => {
   });
 
   it("should fetch a record by ID in getById", async () => {
-    const mockRecord = { id: 1, name: "Entity 1" };
+    const mockRainCity = RainCityMock as RainCity;
 
     (supabaseMock.from as Mock).mockReturnValue({
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
           maybeSingle: vi.fn().mockResolvedValueOnce({
-            data: mockRecord,
+            data: mockRainCity,
             error: null,
           }),
         }),
       }),
     });
 
-    const result = await repository.getById(1);
+    const result = await repository.getById(mockRainCity.id);
 
-    expect(result).toEqual(mockRecord);
+    expect(result).toEqual(mockRainCity);
 
     expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
     expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
     expect(supabaseMock.from(tableName).select().eq).toHaveBeenCalledWith(
       "id",
-      1,
+      mockRainCity.id,
     );
     expect(
-      supabaseMock.from(tableName).select().eq("id", 1).maybeSingle,
+      supabaseMock.from(tableName).select().eq("id", mockRainCity.id)
+        .maybeSingle,
     ).toHaveBeenCalled();
   });
 
   it("should throw an error when getById fails", async () => {
+    const mockId = 1;
     const mockError = { message: "Failed to fetch data" };
 
     (supabaseMock.from as Mock).mockReturnValue({
@@ -146,7 +120,7 @@ describe("BaseRepository", () => {
       }),
     });
 
-    await expect(repository.getById(1)).rejects.toThrow(
+    await expect(repository.getById(mockId)).rejects.toThrow(
       "Error fetching data: Failed to fetch data",
     );
 
@@ -154,93 +128,106 @@ describe("BaseRepository", () => {
     expect(supabaseMock.from(tableName).select).toHaveBeenCalled();
     expect(supabaseMock.from(tableName).select().eq).toHaveBeenCalledWith(
       "id",
-      1,
+      mockId,
     );
     expect(
-      supabaseMock.from(tableName).select().eq("id", 1).maybeSingle,
+      supabaseMock.from(tableName).select().eq("id", mockId).maybeSingle,
     ).toHaveBeenCalled();
   });
 
-  it("should create a new record in create", async () => {
-    const newEntity = { name: "New Entity" };
+  it("should create a record in create", async () => {
+    const mockRainCity = RainCityMock as RainCity;
 
-    const mockCreatedData = { id: 1, name: "New Entity" };
     (supabaseMock.from as Mock).mockReturnValue({
       insert: vi.fn().mockReturnValue({
-        select: vi.fn().mockResolvedValueOnce({
-          data: mockCreatedData,
+        select: vi.fn().mockResolvedValue({
+          data: mockRainCity,
           error: null,
         }),
       }),
     });
 
-    const result = await repository.create(newEntity);
+    const result = await repository.create(mockRainCity);
 
-    expect(result).toEqual(mockCreatedData);
+    expect(result).toEqual(mockRainCity);
 
     expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-    expect(supabaseMock.from(tableName).insert).toHaveBeenCalledWith(newEntity);
+    expect(supabaseMock.from(tableName).insert).toHaveBeenCalledWith(
+      mockRainCity,
+    );
+    expect(
+      supabaseMock.from(tableName).insert(mockRainCity).select,
+    ).toHaveBeenCalled();
   });
 
   it("should throw an error when create fails", async () => {
-    const newEntity = { name: "New Entity" };
-
-    const mockError = { message: "Error creating data" };
+    const mockRainCity = RainCityMock as RainCity;
+    const mockError = { message: "Failed to create data" };
 
     (supabaseMock.from as Mock).mockReturnValue({
       insert: vi.fn().mockReturnValue({
-        select: vi.fn().mockResolvedValueOnce({
+        select: vi.fn().mockResolvedValue({
           data: null,
           error: mockError,
         }),
       }),
     });
 
-    await expect(repository.create(newEntity)).rejects.toThrow(
-      "Error creating data: Error creating data",
+    await expect(repository.create(mockRainCity)).rejects.toThrow(
+      "Error creating data: Failed to create data",
     );
 
     expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-    expect(supabaseMock.from(tableName).insert).toHaveBeenCalledWith(newEntity);
+    expect(supabaseMock.from(tableName).insert).toHaveBeenCalledWith(
+      mockRainCity,
+    );
+    expect(
+      supabaseMock.from(tableName).insert(mockRainCity).select,
+    ).toHaveBeenCalled();
   });
 
-  it("should update an record", async () => {
-    const mockUpdatedData = { id: 1, name: "Updated Entity" };
+  it("should update a record in update", async () => {
+    const mockRainCity = RainCityMock as RainCity;
 
     (supabaseMock.from as Mock).mockReturnValue({
       update: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
-          select: vi.fn().mockResolvedValueOnce({
-            data: mockUpdatedData,
+          select: vi.fn().mockResolvedValue({
+            data: mockRainCity,
             error: null,
           }),
         }),
       }),
     });
 
-    const result = await repository.update(mockUpdatedData.id, {
-      name: "Updated Entity",
-    });
+    const result = await repository.update(mockRainCity.id, mockRainCity);
 
-    expect(result).toEqual(mockUpdatedData);
+    expect(result).toEqual(mockRainCity);
 
     expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-    expect(supabaseMock.from(tableName).update).toHaveBeenCalledWith({
-      name: "Updated Entity",
-    });
+    expect(supabaseMock.from(tableName).update).toHaveBeenCalledWith(
+      mockRainCity,
+    );
     expect(
-      supabaseMock.from(tableName).update(mockUpdatedData).eq,
-    ).toHaveBeenCalledWith("id", mockUpdatedData.id);
+      supabaseMock.from(tableName).update(mockRainCity).eq,
+    ).toHaveBeenCalledWith("id", mockRainCity.id);
+
+    expect(
+      supabaseMock
+        .from(tableName)
+        .update(mockRainCity)
+        .eq("id", mockRainCity.id).select,
+    ).toHaveBeenCalled();
   });
 
   it("should throw an error when update fails", async () => {
-    const mockError = { message: "Error updating data" };
-    const mockUpdatedData = { name: "Updated Entity" };
+    const mockRainCity = RainCityMock as RainCity;
+    const mockError = { message: "Failed to update data" };
 
     (supabaseMock.from as Mock).mockReturnValue({
       update: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
-          select: vi.fn().mockResolvedValueOnce({
+          select: vi.fn().mockResolvedValue({
             data: null,
             error: mockError,
           }),
@@ -248,53 +235,49 @@ describe("BaseRepository", () => {
       }),
     });
 
-    await expect(repository.update(1, mockUpdatedData)).rejects.toThrow(
-      "Error updating data: Error updating data",
-    );
+    await expect(
+      repository.update(mockRainCity.id, mockRainCity),
+    ).rejects.toThrow("Error updating data: Failed to update data");
 
     expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-    expect(supabaseMock.from(tableName).update).toHaveBeenCalledWith({
-      name: "Updated Entity",
-    });
-    expect(
-      supabaseMock.from(tableName).update(mockUpdatedData).eq,
-    ).toHaveBeenCalledWith("id", 1);
+    expect(supabaseMock.from(tableName).update).toHaveBeenCalledWith(
+      mockRainCity,
+    );
   });
 
-  it("should delete an record", async () => {
-    const mockDeletedData = { id: 1, name: "Deleted Entity" };
+  it("should delete a record in delete", async () => {
+    const mockRainCity = RainCityMock as RainCity;
 
     (supabaseMock.from as Mock).mockReturnValue({
       delete: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
-          select: vi.fn().mockResolvedValueOnce({
-            data: mockDeletedData,
+          select: vi.fn().mockResolvedValue({
+            data: mockRainCity,
             error: null,
           }),
         }),
       }),
     });
 
-    const result = await repository.delete(mockDeletedData.id);
+    const result = await repository.delete(mockRainCity.id);
 
-    expect(result).toEqual(mockDeletedData);
+    expect(result).toEqual(mockRainCity);
 
-    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
     expect(supabaseMock.from(tableName).delete).toHaveBeenCalled();
     expect(supabaseMock.from(tableName).delete().eq).toHaveBeenCalledWith(
       "id",
-      mockDeletedData.id,
+      mockRainCity.id,
     );
   });
 
   it("should throw an error when delete fails", async () => {
-    const mockError = { message: "Error deleting data" };
-    const mockDeletedData = { id: 1 };
+    const mockRainCity = RainCityMock as RainCity;
+    const mockError = { message: "Failed to delete data" };
 
     (supabaseMock.from as Mock).mockReturnValue({
       delete: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
-          select: vi.fn().mockResolvedValueOnce({
+          select: vi.fn().mockResolvedValue({
             data: null,
             error: mockError,
           }),
@@ -302,15 +285,15 @@ describe("BaseRepository", () => {
       }),
     });
 
-    await expect(repository.delete(mockDeletedData.id)).rejects.toThrow(
-      "Error deleting data: Error deleting data",
+    await expect(repository.delete(mockRainCity.id)).rejects.toThrow(
+      "Error deleting data: Failed to delete data",
     );
 
     expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
     expect(supabaseMock.from(tableName).delete).toHaveBeenCalled();
     expect(supabaseMock.from(tableName).delete().eq).toHaveBeenCalledWith(
       "id",
-      mockDeletedData.id,
+      mockRainCity.id,
     );
   });
 });
