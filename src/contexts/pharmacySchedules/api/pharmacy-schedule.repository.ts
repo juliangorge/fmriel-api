@@ -4,7 +4,7 @@ import { SupabaseProvider } from "@/shared/supabase/supabase.provider";
 
 import { BaseRepository } from "@/contexts/base/api/base.repository";
 
-import { PharmacySchedule } from "./pharmacy-schedules.model";
+import { PharmacySchedule } from "./pharmacy-schedule.model";
 
 @Injectable()
 export class PharmacyScheduleRepository extends BaseRepository<PharmacySchedule> {
@@ -26,16 +26,5 @@ export class PharmacyScheduleRepository extends BaseRepository<PharmacySchedule>
     }
 
     return data as PharmacySchedule[];
-  }
-
-  async delete(id: number): Promise<void> {
-    const { error } = await this.supabase
-      .from(this.tableName)
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      throw new Error(`Error deleting record: ${error.message}`);
-    }
   }
 }

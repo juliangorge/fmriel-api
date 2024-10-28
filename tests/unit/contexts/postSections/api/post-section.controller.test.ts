@@ -44,7 +44,7 @@ describe("PostSectionController", () => {
   });
 
   describe("getById", () => {
-    it("should return a post by ID", async () => {
+    it("should return a post section by ID", async () => {
       const id = 1;
       const mockPostSection = { ...PostSectionMock, id };
 

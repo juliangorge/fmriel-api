@@ -1,5 +1,6 @@
 /* eslint-disable unicorn/no-null */
 import { CacheModule } from "@nestjs/cache-manager";
+import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { vi } from "vitest";
 
@@ -57,14 +58,22 @@ describe("PostController", () => {
   });
 
   describe("getById", () => {
+    const id = 1;
     it("should return a post by ID", async () => {
-      const id = 1;
       const mockPost = { ...PostMock, id };
 
       vi.spyOn(service, "getById").mockResolvedValue(mockPost as never);
 
       const response = await controller.getById(id.toString());
       expect(response).toEqual(mockPost);
+    });
+
+    it("should throw NotFoundException if no record is found by ID", async () => {
+      vi.spyOn(service, "getById").mockResolvedValue(null);
+
+      await expect(controller.getById(id.toString())).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

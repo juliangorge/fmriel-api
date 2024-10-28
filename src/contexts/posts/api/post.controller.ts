@@ -28,11 +28,7 @@ export class PostController {
   @CacheTTL(3600) // 1 hour
   @Get("highlights")
   async getHighlights() {
-    const posts = await this.service.getHighlights();
-    if (!posts) {
-      throw new NotFoundException();
-    }
-    return posts;
+    return await this.service.getHighlights();
   }
 
   @UseInterceptors(CacheInterceptor)

@@ -14,7 +14,7 @@ import { ApiBearerAuth } from "@nestjs/swagger";
 
 import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
 
-import * as pharmacyModel from "./pharmacy.model";
+import { Pharmacy } from "./pharmacy.model";
 import { PharmacyService } from "./pharmacy.service";
 
 @Controller("pharmacies")
@@ -35,21 +35,18 @@ export class PharmacyController {
     const pharmacyId = Number.parseInt(id, 10);
     const pharmacy = await this.service.getById(pharmacyId);
     if (!pharmacy) {
-      throw new NotFoundException(`Pharmacy with ID ${id} not found`);
+      throw new NotFoundException();
     }
     return pharmacy;
   }
 
   @Post()
-  async create(@Body() pharmacy: pharmacyModel.Pharmacy) {
+  async create(@Body() pharmacy: Pharmacy) {
     return this.service.create(pharmacy);
   }
 
   @Put(":id")
-  async update(
-    @Param("id") id: string,
-    @Body() pharmacy: pharmacyModel.Pharmacy,
-  ) {
+  async update(@Param("id") id: string, @Body() pharmacy: Pharmacy) {
     const pharmacyId = Number.parseInt(id, 10);
     return this.service.update(pharmacyId, pharmacy);
   }
