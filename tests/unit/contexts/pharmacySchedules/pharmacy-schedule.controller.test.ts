@@ -72,11 +72,11 @@ describe("PharmacyScheduleController", () => {
       }
     });
 
-    it("should throw BadRequestException for an unparseable date", async () => {
-      const unparseableDate = "2023-02-30";
+    it("should throw BadRequestException for an unparsable date", async () => {
+      const unparsableDate = "2023-02-30";
 
       try {
-        await controller.getByDate(unparseableDate);
+        await controller.getByDate(unparsableDate);
       } catch (error) {
         expect(error).toBeInstanceOf(BadRequestException);
       }
