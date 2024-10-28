@@ -1,3 +1,5 @@
+import type { PharmacySchedule } from "./pharmacy-schedule.model";
+
 import {
   BadRequestException,
   Body,
@@ -10,7 +12,6 @@ import {
   Query,
 } from "@nestjs/common";
 
-import { PharmacySchedule } from "./pharmacy-schedule.model";
 import { PharmacyScheduleService } from "./pharmacy-schedule.service";
 
 @Controller("pharmacy_schedules")

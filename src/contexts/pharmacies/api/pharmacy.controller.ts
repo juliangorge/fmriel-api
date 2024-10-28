@@ -1,3 +1,5 @@
+import type { Pharmacy } from "./pharmacy.model";
+
 import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
 import {
   Body,
@@ -14,7 +16,6 @@ import { ApiBearerAuth } from "@nestjs/swagger";
 
 import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
 
-import { Pharmacy } from "./pharmacy.model";
 import { PharmacyService } from "./pharmacy.service";
 
 @Controller("pharmacies")
