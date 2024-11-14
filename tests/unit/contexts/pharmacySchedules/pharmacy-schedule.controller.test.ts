@@ -112,7 +112,7 @@ describe("PharmacyScheduleController", () => {
 
       vi.spyOn(service, "update").mockResolvedValue(mockPharmacies as never);
 
-      const response = await controller.update(id.toString(), mockPharmacies);
+      const response = await controller.update(id, mockPharmacies);
       expect(response).toEqual(mockPharmacies);
     });
   });
