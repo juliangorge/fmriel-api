@@ -12,16 +12,15 @@ export class DeathRecordRepository extends BaseRepository<DeathReport> {
     super(supabaseProvider, "death_reports");
   }
 
-  async findByName(name: string, surname: string): Promise<DeathReport[]> {
+  async findByQuery(query: string): Promise<DeathReport[]> {
     const { data, error } = await this.supabase
       .from(this.tableName)
       .select()
-      .ilike("name", `%${name}%`)
-      .ilike("surname", `%${surname}%`);
+      .or(`name.ilike.%${query}%,surname.ilike.%${query}%`);
 
     if (error) {
       throw new Error(
-        `Error fetching death records by name and surname: ${error.message}`,
+        `Error fetching death records by query in name or surname: ${error.message}`,
       );
     }
 
