@@ -8,8 +8,8 @@ import { HealthModule } from "@/app/health/health.module";
 
 import { LoggerModule } from "@/shared/logger/logger.module";
 
-import { PharmacyModule } from "@/contexts/pharmacies/pharmacy.module";
 import { DeathReportModule } from "@/contexts/deathReports/death-reports.module";
+import { PharmacyModule } from "@/contexts/pharmacies/pharmacy.module";
 import { PostModule } from "@/contexts/posts/post.module";
 import { PostSectionModule } from "@/contexts/postSections/post-section.module";
 import { RainCityModule } from "@/contexts/rainCities/rain-city.module";
