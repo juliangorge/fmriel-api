@@ -7,7 +7,7 @@ import { BaseRepository } from "@/contexts/base/api/base.repository";
 import { DeathReport } from "./death-reports.model";
 
 @Injectable()
-export class DeathRecordRepository extends BaseRepository<DeathReport> {
+export class DeathReportRepository extends BaseRepository<DeathReport> {
   constructor(protected supabaseProvider: SupabaseProvider) {
     super(supabaseProvider, "death_reports");
   }
