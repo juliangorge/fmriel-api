@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 
 import { AuthModule } from "@/src/app/auth/auth.module";
-import { DeathReportModule } from "@/src/contexts/deathReports/death-reports.module";
+import { DeathReportModule } from "@/src/contexts/deathReport/death-reports.module";
 import { PharmacyScheduleModule } from "@/src/contexts/pharmacySchedules/pharmacy-schedule.module";
 
 import { HealthModule } from "@/app/health/health.module";
