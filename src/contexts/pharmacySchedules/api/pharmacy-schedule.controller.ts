@@ -1,5 +1,6 @@
 import type { PharmacySchedule } from "./pharmacy-schedule.model";
 
+import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
 import {
   BadRequestException,
   Body,
@@ -10,6 +11,7 @@ import {
   Post,
   Put,
   Query,
+  UseInterceptors,
 } from "@nestjs/common";
 
 import { PharmacyScheduleService } from "./pharmacy-schedule.service";
@@ -18,11 +20,15 @@ import { PharmacyScheduleService } from "./pharmacy-schedule.service";
 export class PharmacyScheduleController {
   constructor(protected readonly service: PharmacyScheduleService) {}
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(3600) // 1 hora
   @Get()
   async getAll(): Promise<PharmacySchedule[]> {
     return this.service.getAll();
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(3600) // 1 hora
   @Get("date")
   async getByDate(@Query("date") dateStr: string): Promise<PharmacySchedule[]> {
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
