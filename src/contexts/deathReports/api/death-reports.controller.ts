@@ -1,3 +1,4 @@
+import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
 import {
   Body,
   Controller,
@@ -7,6 +8,7 @@ import {
   Post,
   Put,
   Query,
+  UseInterceptors,
 } from "@nestjs/common";
 
 import { DeathReport } from "./death-reports.model";
@@ -16,11 +18,15 @@ import { DeathReportService } from "./death-reports.service";
 export class DeathReportController {
   constructor(private readonly deathReportService: DeathReportService) {}
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(3600) // 1 hora
   @Get()
   async getAll(): Promise<DeathReport[]> {
     return this.deathReportService.getAll();
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(1800) // 30 minutos
   @Get("search")
   async findByQuery(@Query("query") query: string): Promise<DeathReport[]> {
     return this.deathReportService.findByQuery(query);
