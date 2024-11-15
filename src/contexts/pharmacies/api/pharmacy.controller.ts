@@ -24,6 +24,8 @@ import { PharmacyService } from "./pharmacy.service";
 export class PharmacyController {
   constructor(protected readonly service: PharmacyService) {}
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(3600) // 1 hora
   @Get()
   getAll() {
     return this.service.getAll();
