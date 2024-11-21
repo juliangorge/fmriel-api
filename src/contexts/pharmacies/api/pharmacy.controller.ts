@@ -2,6 +2,7 @@ import type { Pharmacy } from "./pharmacy.model";
 
 import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -51,6 +52,11 @@ export class PharmacyController {
   @Put(":id")
   async update(@Param("id") id: string, @Body() pharmacy: Pharmacy) {
     const pharmacyId = Number.parseInt(id, 10);
+
+    if (Number.isNaN(pharmacyId)) {
+      throw new BadRequestException("The provided ID must be a valid number.");
+    }
+
     return this.service.update(pharmacyId, pharmacy);
   }
 }
