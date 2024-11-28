@@ -15,7 +15,9 @@ import {
 import { ApiBearerAuth } from "@nestjs/swagger";
 
 import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
+import { validateDto } from "@/src/utils/validateDto";
 
+import { CreatePharmacyDto } from "./pharmacy.dto";
 import { PharmacyService } from "./pharmacy.service";
 
 @Controller("pharmacies")
@@ -44,8 +46,9 @@ export class PharmacyController {
   }
 
   @Post()
-  async create(@Body() pharmacy: Pharmacy) {
-    return this.service.create(pharmacy);
+  async create(@Body() createPharmacyDto: CreatePharmacyDto) {
+    await validateDto(createPharmacyDto);
+    return this.service.create(createPharmacyDto);
   }
 
   @Put(":id")
