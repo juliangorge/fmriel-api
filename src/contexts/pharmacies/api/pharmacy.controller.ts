@@ -1,5 +1,3 @@
-import type { Pharmacy } from "./pharmacy.model";
-
 import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
 import {
   BadRequestException,
@@ -18,7 +16,7 @@ import { ApiBearerAuth } from "@nestjs/swagger";
 import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
 import { validateDto } from "@/src/utils/validateDto";
 
-import { CreatePharmacyDto } from "./pharmacy.dto";
+import { CreatePharmacyDto, UpdatePharmacyDto } from "./pharmacy.dto";
 import { PharmacyService } from "./pharmacy.service";
 
 @Controller("pharmacies")
@@ -53,13 +51,18 @@ export class PharmacyController {
   }
 
   @Put(":id")
-  async update(@Param("id") id: string, @Body() pharmacy: Pharmacy) {
+  async update(
+    @Param("id") id: string,
+    @Body() updatePharmacyDto: UpdatePharmacyDto,
+  ) {
     const pharmacyId = Number.parseInt(id, 10);
 
     if (Number.isNaN(pharmacyId)) {
       throw new BadRequestException("The provided ID must be a valid number.");
     }
 
-    return this.service.update(pharmacyId, pharmacy);
+    await validateDto(updatePharmacyDto);
+
+    return this.service.update(pharmacyId, updatePharmacyDto);
   }
 }
