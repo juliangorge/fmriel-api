@@ -51,7 +51,7 @@ export class CreateDeathReportDto {
   @ApiProperty({
     description: "The funeral location (optional)",
     required: false,
-    example: "Calle Estrada 123",
+    example: "Estrada 123",
   })
   @IsString()
   @IsOptional()
@@ -116,7 +116,7 @@ export class UpdateDeathReportDto {
   @ApiProperty({
     description: "The place of death (optional)",
     required: false,
-    example: "Concepciion del Uruguay",
+    example: "Concepcion del Uruguay",
   })
   @IsString()
   @IsOptional()
@@ -125,7 +125,7 @@ export class UpdateDeathReportDto {
   @ApiProperty({
     description: "The funeral location (optional)",
     required: false,
-    example: "Calle Estrada 123",
+    example: "Estrada 123",
   })
   @IsString()
   @IsOptional()
