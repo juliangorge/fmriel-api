@@ -11,12 +11,24 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
+import { validateDto } from "@/src/utils/validateDto";
+
+import {
+  CreatePharmacyScheduleDto,
+  UpdatePharmacyScheduleDto,
+} from "./pharmacy-schedule.dto";
 import { PharmacyScheduleService } from "./pharmacy-schedule.service";
 
+@ApiTags("Pharmacy Schedules")
 @Controller("pharmacy_schedules")
+@UseGuards(SupabaseAuthGuard)
+@ApiBearerAuth("access-token")
 export class PharmacyScheduleController {
   constructor(protected readonly service: PharmacyScheduleService) {}
 
@@ -48,18 +60,25 @@ export class PharmacyScheduleController {
   }
 
   @Post()
-  async create(
-    @Body() pharmacySchedule: PharmacySchedule,
-  ): Promise<PharmacySchedule> {
-    return this.service.create(pharmacySchedule);
+  async create(@Body() createPharmacyScheduleDto: CreatePharmacyScheduleDto) {
+    await validateDto(CreatePharmacyScheduleDto);
+    return this.service.create(createPharmacyScheduleDto);
   }
 
   @Put(":id")
   async update(
-    @Param("id") id: number,
-    @Body() pharmacySchedule: Partial<PharmacySchedule>,
-  ): Promise<PharmacySchedule> {
-    return this.service.update(id, pharmacySchedule);
+    @Param("id") id: string,
+    @Body() updatePharmacyScheduleDto: UpdatePharmacyScheduleDto,
+  ) {
+    const scheduleId = Number.parseInt(id, 10);
+
+    if (Number.isNaN(scheduleId)) {
+      throw new BadRequestException("The provided ID must be a valid number.");
+    }
+
+    await validateDto(UpdatePharmacyScheduleDto);
+
+    return this.service.update(scheduleId, updatePharmacyScheduleDto);
   }
 
   @Delete(":id")
