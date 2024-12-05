@@ -1,5 +1,6 @@
 import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -11,6 +12,12 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 
+import { validateDto } from "@/src/utils/validateDto";
+
+import {
+  CreateDeathReportDto,
+  UpdateDeathReportDto,
+} from "./death-reports.dto";
 import { DeathReport } from "./death-reports.model";
 import { DeathReportService } from "./death-reports.service";
 
@@ -33,18 +40,24 @@ export class DeathReportController {
   }
 
   @Post()
-  async create(
-    @Body() deathReport: Omit<DeathReport, "id">,
-  ): Promise<DeathReport> {
-    return this.deathReportService.create(deathReport);
+  async create(@Body() createDeathReportDto: CreateDeathReportDto) {
+    await validateDto(createDeathReportDto);
+    return this.deathReportService.create(createDeathReportDto);
   }
 
   @Put(":id")
   async update(
-    @Param("id") id: number,
-    @Body() deathReport: Partial<Omit<DeathReport, "id">>,
-  ): Promise<DeathReport> {
-    return this.deathReportService.update(id, deathReport);
+    @Param("id") id: string,
+    @Body() updateDeathReportDto: UpdateDeathReportDto,
+  ) {
+    const reportId = Number.parseInt(id, 10);
+
+    if (Number.isNaN(reportId)) {
+      throw new BadRequestException("The provided ID must be a valid number.");
+    }
+    await validateDto(updateDeathReportDto);
+
+    return this.deathReportService.update(reportId, updateDeathReportDto);
   }
 
   @Delete(":id")
