@@ -18,13 +18,11 @@ import { validateDto } from "@/src/utils/validateDto";
 
 import { CreatePharmacyDto, UpdatePharmacyDto } from "./pharmacy.dto";
 import { PharmacyService } from "./pharmacy.service";
-import { CreateDeathReportDto, UpdateDeathReportDto } from "../../deathReports/api/death-reports.dto";
 
 @Controller("pharmacies")
 @UseGuards(SupabaseAuthGuard)
 @ApiBearerAuth("access-token")
 export class PharmacyController {
-  deathReportService: any;
   constructor(protected readonly service: PharmacyService) {}
 
   @UseInterceptors(CacheInterceptor)
@@ -45,25 +43,26 @@ export class PharmacyController {
     }
     return pharmacy;
   }
+
   @Post()
-  async create(@Body() createDeathReportDto: CreateDeathReportDto) {
-    await validateDto(createDeathReportDto);
-    return this.deathReportService.create(createDeathReportDto);
+  async create(@Body() createPharmacyDto: CreatePharmacyDto) {
+    await validateDto(createPharmacyDto);
+    return this.service.create(createPharmacyDto);
   }
 
   @Put(":id")
   async update(
     @Param("id") id: string,
-    @Body() updateDeathReportDto: UpdateDeathReportDto,
+    @Body() updatePharmacyDto: UpdatePharmacyDto,
   ) {
-    const reportId = Number.parseInt(id, 10);
+    const pharmacyId = Number.parseInt(id, 10);
 
-    if (Number.isNaN(reportId)) {
+    if (Number.isNaN(pharmacyId)) {
       throw new BadRequestException("The provided ID must be a valid number.");
     }
 
-    // Validar el DTO de UpdateDeathReport antes de pasarlo al servicio
-    await validateDto(updateDeathReportDto);
+    await validateDto(updatePharmacyDto);
 
-    return this.deathReportService.update(reportId, updateDeathReportDto);
+    return this.service.update(pharmacyId, updatePharmacyDto);
   }
+}
