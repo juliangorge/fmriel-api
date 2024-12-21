@@ -1,4 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
+import { Transform } from "class-transformer";
 import {
   IsDate,
   IsInt,
@@ -34,9 +35,11 @@ export class CreateDeathReportDto {
 
   @ApiProperty({
     description: "The date of death",
-    example: "2024-12-01T10:00:00Z",
+    example: "2024-12-01",
   })
   @IsDate()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument
+  @Transform(({ value }) => (value ? new Date(value) : value))
   date_of_death!: Date;
 
   @ApiProperty({
@@ -58,12 +61,14 @@ export class CreateDeathReportDto {
   funeral_location?: string;
 
   @ApiProperty({
-    description: "The funeral date and time (optional)",
+    description: "The funeral date (optional)",
     required: false,
-    example: "2024-12-03T14:00:00Z",
+    example: "2024-12-03",
   })
-  @IsDate()
   @IsOptional()
+  @IsDate()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument
+  @Transform(({ value }) => (value ? new Date(value) : value))
   funeral_date?: Date;
 
   @ApiProperty({
@@ -107,10 +112,12 @@ export class UpdateDeathReportDto {
   @ApiProperty({
     description: "The date of death",
     required: false,
-    example: "2024-12-01T10:00:00Z",
+    example: "2024-12-01",
   })
   @IsDate()
   @IsOptional()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument
+  @Transform(({ value }) => (value ? new Date(value) : value))
   date_of_death?: Date;
 
   @ApiProperty({
@@ -132,12 +139,14 @@ export class UpdateDeathReportDto {
   funeral_location?: string;
 
   @ApiProperty({
-    description: "The funeral date and time (optional)",
+    description: "The funeral date (optional)",
     required: false,
-    example: "2024-12-03T14:00:00Z",
+    example: "2024-12-03", // Fecha sin hora, ajustada al formato que necesitas
   })
-  @IsDate()
   @IsOptional()
+  @IsDate()
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument
+  @Transform(({ value }) => (value ? new Date(value) : value)) // Convierte el string en un objeto Date
   funeral_date?: Date;
 
   @ApiProperty({
