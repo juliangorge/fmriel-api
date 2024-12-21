@@ -8,7 +8,7 @@ export interface Post {
   tags: string;
   image?: string;
   epigraph?: string;
-  created_at: Date;
-  last_modified_at: Date;
+  created_at?: Date;
+  last_modified_at?: Date;
   user_id: number;
 }
