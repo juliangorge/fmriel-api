@@ -1,7 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 import {
-  IsDate,
   IsInt,
   IsNotEmpty,
   IsOptional,
@@ -37,7 +36,7 @@ export class CreateDeathReportDto {
     description: "The date of death",
     example: "2024-12-01",
   })
-  @IsDate()
+  @IsString()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument
   @Transform(({ value }) => (value ? new Date(value) : value))
   date_of_death!: Date;
@@ -66,7 +65,6 @@ export class CreateDeathReportDto {
     example: "2024-12-03",
   })
   @IsOptional()
-  @IsDate()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument
   @Transform(({ value }) => (value ? new Date(value) : value))
   funeral_date?: Date;
@@ -114,7 +112,6 @@ export class UpdateDeathReportDto {
     required: false,
     example: "2024-12-01",
   })
-  @IsDate()
   @IsOptional()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument
   @Transform(({ value }) => (value ? new Date(value) : value))
@@ -144,7 +141,6 @@ export class UpdateDeathReportDto {
     example: "2024-12-03", // Fecha sin hora, ajustada al formato que necesitas
   })
   @IsOptional()
-  @IsDate()
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument
   @Transform(({ value }) => (value ? new Date(value) : value)) // Convierte el string en un objeto Date
   funeral_date?: Date;
