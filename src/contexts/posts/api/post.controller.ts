@@ -1,16 +1,22 @@
 import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   NotFoundException,
   Param,
+  Post,
+  Put,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
 import { ApiBearerAuth } from "@nestjs/swagger";
 
 import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
+import { validateDto } from "@/src/utils/validateDto";
 
+import { CreatePostDto, UpdatePostDto } from "./post.dto";
 import { PostService } from "./post.service";
 
 @Controller("posts")
@@ -48,5 +54,32 @@ export class PostController {
   @Get("mainHighlights")
   getMainHighlights() {
     return this.service.getMainHighlights();
+  }
+
+  @Post()
+  async create(@Body() createPostDto: CreatePostDto) {
+    await validateDto(createPostDto);
+    return this.service.create(createPostDto);
+  }
+
+  @Put(":id")
+  async update(@Param("id") id: string, @Body() updatePostDto: UpdatePostDto) {
+    const postId = Number.parseInt(id, 10);
+    await validateDto(updatePostDto); // Validate DTO before proceeding
+    const post = await this.service.update(postId, updatePostDto);
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${id} not found`);
+    }
+    return post;
+  }
+
+  @Delete(":id")
+  async delete(@Param("id") id: string) {
+    const postId = Number.parseInt(id, 10);
+    const post = await this.service.delete(postId);
+    if (!post) {
+      throw new NotFoundException(`Post with ID ${id} not found`);
+    }
+    return { message: `Post with ID ${id} successfully deleted` };
   }
 }
