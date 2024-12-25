@@ -37,10 +37,18 @@ export class PharmacyController {
   @Get(":id")
   async getById(@Param("id") id: string) {
     const pharmacyId = Number.parseInt(id, 10);
+
+    if (Number.isNaN(pharmacyId)) {
+      throw new BadRequestException("The provided ID must be a valid number.");
+    }
+
     const pharmacy = await this.service.getById(pharmacyId);
     if (!pharmacy) {
-      throw new NotFoundException();
+      throw new NotFoundException(
+        `Pharmacy with ID ${pharmacyId} was not found.`,
+      );
     }
+
     return pharmacy;
   }
 
