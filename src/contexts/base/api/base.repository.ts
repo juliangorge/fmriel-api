@@ -4,7 +4,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 
 import { SupabaseProvider } from "@/shared/supabase/supabase.provider";
 
-interface Identifiable {
+export interface Identifiable {
   id: number;
 }
 
@@ -21,8 +21,17 @@ export class BaseRepository<T extends Identifiable> {
     this.tableName = tableName;
   }
 
-  async getAll(): Promise<T[]> {
-    const { data, error } = await this.supabase.from(this.tableName).select();
+  async getAll(
+    limit: number = 10,
+    offset: number = 0,
+    sortBy: string = "id",
+    ascending: boolean = true,
+  ): Promise<T[]> {
+    const { data, error } = await this.supabase
+      .from(this.tableName)
+      .select()
+      .order(sortBy, { ascending })
+      .range(offset, offset + limit - 1);
     if (error) throw new Error(`Error fetching data: ${error.message}`);
     return data as T[];
   }

@@ -1,6 +1,5 @@
 import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -37,16 +36,9 @@ export class PharmacyController {
   @Get(":id")
   async getById(@Param("id") id: string) {
     const pharmacyId = Number.parseInt(id, 10);
-
-    if (Number.isNaN(pharmacyId)) {
-      throw new BadRequestException("The provided ID must be a valid number.");
-    }
-
     const pharmacy = await this.service.getById(pharmacyId);
     if (!pharmacy) {
-      throw new NotFoundException(
-        `Pharmacy with ID ${pharmacyId} was not found.`,
-      );
+      throw new NotFoundException();
     }
 
     return pharmacy;
@@ -64,13 +56,12 @@ export class PharmacyController {
     @Body() updatePharmacyDto: UpdatePharmacyDto,
   ) {
     const pharmacyId = Number.parseInt(id, 10);
-
-    if (Number.isNaN(pharmacyId)) {
-      throw new BadRequestException("The provided ID must be a valid number.");
+    await validateDto(updatePharmacyDto);
+    const pharmacy = await this.service.update(pharmacyId, updatePharmacyDto);
+    if (!pharmacy) {
+      throw new NotFoundException();
     }
 
-    await validateDto(updatePharmacyDto);
-
-    return this.service.update(pharmacyId, updatePharmacyDto);
+    return pharmacy;
   }
 }

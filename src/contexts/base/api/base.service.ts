@@ -15,8 +15,13 @@ export class BaseService<T extends Identifiable> {
     protected readonly repository: BaseRepository<T>,
   ) {}
 
-  async getAll(): Promise<T[]> {
-    return await this.repository.getAll();
+  async getAll(
+    limit: number = 10,
+    offset: number = 0,
+    sortBy: string = "id",
+    ascending: boolean = true,
+  ): Promise<T[]> {
+    return await this.repository.getAll(limit, offset, sortBy, ascending);
   }
 
   async getById(id: number): Promise<T | null> {

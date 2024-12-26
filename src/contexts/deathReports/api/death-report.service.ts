@@ -4,8 +4,8 @@ import { SupabaseProvider } from "@/shared/supabase/supabase.provider";
 
 import { BaseService } from "@/contexts/base/api/base.service";
 
-import { DeathReport } from "./death-reports.model";
-import { DeathReportRepository } from "./death-reports.repository";
+import { DeathReport } from "./death-report.model";
+import { DeathReportRepository } from "./death-report.repository";
 
 @Injectable()
 export class DeathReportService extends BaseService<DeathReport> {

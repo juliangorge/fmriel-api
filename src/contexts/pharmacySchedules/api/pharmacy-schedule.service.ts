@@ -16,7 +16,7 @@ export class PharmacyScheduleService extends BaseService<PharmacySchedule> {
     super(supabaseProvider, repository);
   }
 
-  async getByDate(date: Date): Promise<PharmacySchedule[]> {
+  async getByDate(date: Date): Promise<PharmacySchedule> {
     return this.repository.getByDate(date);
   }
 }

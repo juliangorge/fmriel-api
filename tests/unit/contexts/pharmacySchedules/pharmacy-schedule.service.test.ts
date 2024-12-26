@@ -15,6 +15,7 @@ describe("PharmacyScheduleService", () => {
   const mockPharmacyScheduleRepository = {
     getAll: vi.fn(),
     getById: vi.fn(),
+    getByDate: vi.fn(),
   };
 
   const mockSupabaseProvider = {
@@ -56,5 +57,12 @@ describe("PharmacyScheduleService", () => {
     expect(response).toBe(mock);
   });
 
-  // We must adding delete tests
+  it("should return by date", async () => {
+    const date = new Date();
+    const mock = [PharmacyScheduleMock];
+    mockPharmacyScheduleRepository.getByDate.mockReturnValue(mock);
+
+    const response = await service.getByDate(date);
+    expect(response).toBe(mock);
+  });
 });

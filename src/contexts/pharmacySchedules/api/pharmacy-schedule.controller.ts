@@ -42,7 +42,7 @@ export class PharmacyScheduleController {
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(3600) // 1 hora
   @Get("date")
-  async getByDate(@Query("date") dateStr: string): Promise<PharmacySchedule[]> {
+  async getByDate(@Query("date") dateStr: string): Promise<PharmacySchedule> {
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(dateStr)) {
       throw new BadRequestException(
@@ -56,7 +56,13 @@ export class PharmacyScheduleController {
       throw new BadRequestException("Invalid date provided.");
     }
 
-    return this.service.getByDate(date);
+    const schedule = await this.service.getByDate(date);
+
+    if (!schedule) {
+      throw new BadRequestException("No schedule found for the provided date.");
+    }
+
+    return schedule;
   }
 
   @Post()
@@ -71,14 +77,15 @@ export class PharmacyScheduleController {
     @Body() updatePharmacyScheduleDto: UpdatePharmacyScheduleDto,
   ) {
     const scheduleId = Number.parseInt(id, 10);
-
-    if (Number.isNaN(scheduleId)) {
-      throw new BadRequestException("The provided ID must be a valid number.");
-    }
-
     await validateDto(UpdatePharmacyScheduleDto);
-
-    return this.service.update(scheduleId, updatePharmacyScheduleDto);
+    const pharmacySchedule = await this.service.update(
+      scheduleId,
+      updatePharmacyScheduleDto,
+    );
+    if (!pharmacySchedule) {
+      throw new BadRequestException();
+    }
+    return pharmacySchedule;
   }
 
   @Delete(":id")

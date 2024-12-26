@@ -3,18 +3,18 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
-import { PostMock } from "@/tests/utils/mocks/post";
+import { DeathReportMock } from "@/tests/utils/mocks/death-report";
 
-import { Post } from "@/src/contexts/posts/api/post.model";
-import { PostRepository } from "@/src/contexts/posts/api/post.repository";
+import { DeathReport } from "@/src/contexts/deathReports/api/death-report.model";
+import { DeathReportRepository } from "@/src/contexts/deathReports/api/death-report.repository";
 
 import { SupabaseProvider } from "@/shared/supabase/supabase.provider";
 
-describe("PostRepository", () => {
-  let repository: PostRepository;
+describe("DeathReportRepository", () => {
+  let repository: DeathReportRepository;
   let supabaseMock: SupabaseClient;
   let supabaseProviderMock: SupabaseProvider;
-  const tableName = "posts";
+  const tableName = "death_reports";
 
   beforeEach(() => {
     // 1. Create a basic mock for supabase, only `from()` is mocked here.
@@ -28,7 +28,7 @@ describe("PostRepository", () => {
     } as unknown as SupabaseProvider;
 
     // 3. Instantiate the repository with the mock provider
-    repository = new PostRepository(supabaseProviderMock);
+    repository = new DeathReportRepository(supabaseProviderMock);
   });
 
   afterEach(() => {
@@ -40,14 +40,14 @@ describe("PostRepository", () => {
    *    BaseRepository’s getAll() calls:
    *      from(tableName).select().order(sortBy, { ascending }).range(offset, offset+limit-1)
    *
-   *    If you *don't* actually use .order()/.range() in PostRepository's getAll,
+   *    If you *don't* actually use .order()/.range() in DeathReportRepository's getAll,
    *    you can keep it simple as from(tableName).select() -> { data, error }.
    *    Adjust these mocks to match exactly what your BaseRepository does.
    */
   it("should fetch all records in getAll", async () => {
-    const mockData: Post[] = [PostMock, PostMock];
+    const mockData: DeathReport[] = [DeathReportMock, DeathReportMock];
 
-    // If PostRepository relies on the *parent’s* getAll (which includes .order and .range),
+    // If DeathReportRepository relies on the *parent’s* getAll (which includes .order and .range),
     // you need the chain: select -> order -> range -> resolves { data, error }.
     // Otherwise, if it’s just .select() in your code, you can keep it simpler.
 
@@ -102,30 +102,30 @@ describe("PostRepository", () => {
   /*
    * 3) getById (SUCCESS)
    *    from(tableName)
-   *      .select("*, post_sections(name)")
+   *      .select()
    *      .eq("id", id)
    *      .maybeSingle()
    */
   it("should fetch a post by ID in getById", async () => {
-    const mockPost: Post = PostMock;
+    const mockDeathReport: DeathReport = DeathReportMock;
 
     // Build the chain:
     const maybeSingleMock = vi
       .fn()
-      .mockResolvedValue({ data: mockPost, error: null });
+      .mockResolvedValue({ data: mockDeathReport, error: null });
     const eqMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
-    // The .select() might accept a string argument, e.g. select("*, post_sections(name)")
+    // The .select() might accept a string argument, e.g. select()
     const selectMock = vi.fn().mockReturnValue({ eq: eqMock });
 
     (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
 
     const result = await repository.getById(1);
 
-    expect(result).toEqual(mockPost);
+    expect(result).toEqual(mockDeathReport);
 
     // Validate chain
     expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-    expect(selectMock).toHaveBeenCalledWith("*, post_sections(name)");
+    expect(selectMock).toHaveBeenCalled();
     expect(eqMock).toHaveBeenCalledWith("id", 1);
     expect(maybeSingleMock).toHaveBeenCalled();
   });
@@ -149,91 +149,59 @@ describe("PostRepository", () => {
     );
 
     expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-    expect(selectMock).toHaveBeenCalledWith("*, post_sections(name)");
+    expect(selectMock).toHaveBeenCalled();
     expect(eqMock).toHaveBeenCalledWith("id", 1);
     expect(maybeSingleMock).toHaveBeenCalled();
   });
 
   /*
-   * 5) getHighlights (SUCCESS)
+   * 5) findByQuery (SUCCESS)
    *    from(tableName)
-   *      .select("*, post_sections(name)")
+   *      .select()
+   *      .textSearch("column", query)
    */
-  it("should fetch all highlighted records in getHighlights", async () => {
-    const mockData: Post[] = [PostMock, PostMock];
+  describe("findByQuery", () => {
+    it("should fetch records by query (SUCCESS)", async () => {
+      const mockData: DeathReport[] = [DeathReportMock, DeathReportMock];
+      const query = "TestName";
 
-    const selectMock = vi
-      .fn()
-      .mockResolvedValue({ data: mockData, error: null });
-    (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
+      // Final method: or(...) => returns a promise
+      const orMock = vi.fn().mockResolvedValue({ data: mockData, error: null });
+      // select() => { or: orMock }
+      const selectMock = vi.fn().mockReturnValue({ or: orMock });
 
-    const result = await repository.getHighlights();
-    expect(result).toEqual(mockData);
+      (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
 
-    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-    expect(selectMock).toHaveBeenCalledWith("*, post_sections(name)");
-  });
+      const result = await repository.findByQuery(query);
+      expect(result).toEqual(mockData);
 
-  /*
-   * 6) getHighlights (ERROR)
-   */
-  it("should throw an error when getHighlights fails", async () => {
-    const mockError = { message: "Failed to fetch data" };
+      // Verify chain
+      expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+      expect(selectMock).toHaveBeenCalled(); // or .toHaveBeenCalledWith() if you pass fields to select
+      expect(orMock).toHaveBeenCalledWith(
+        `name.ilike.%${query}%,surname.ilike.%${query}%`,
+      );
+    });
 
-    const selectMock = vi
-      .fn()
-      .mockResolvedValue({ data: null, error: mockError });
-    (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
+    it("should throw an error when findByQuery fails", async () => {
+      const query = "TestName";
+      const mockError = { message: "Failed to fetch data" };
 
-    await expect(repository.getHighlights()).rejects.toThrow(
-      "Error fetching data: Failed to fetch data",
-    );
+      const orMock = vi
+        .fn()
+        .mockResolvedValue({ data: null, error: mockError });
+      const selectMock = vi.fn().mockReturnValue({ or: orMock });
+      (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
 
-    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-    expect(selectMock).toHaveBeenCalledWith("*, post_sections(name)");
-  });
+      await expect(repository.findByQuery(query)).rejects.toThrow(
+        "Error fetching death records by query in name or surname: Failed to fetch data",
+      );
 
-  /*
-   * 7) getMainHighlights (SUCCESS)
-   *    from("highlight_posts")
-   *      .select("posts(*, post_sections(name))")
-   *    Then map => item.posts
-   */
-  it("should fetch all main highlighted records in getMainHighlights", async () => {
-    // highlight_posts table returns array of objects, each containing { posts: Post }
-    const mockData = [{ posts: PostMock }, { posts: PostMock }];
-
-    const selectMock = vi
-      .fn()
-      .mockResolvedValue({ data: mockData, error: null });
-    (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
-
-    const result = await repository.getMainHighlights();
-
-    // The repository code maps (data as { posts: Post }[]).map(item => item.posts)
-    const expectedPosts = mockData.map(item => item.posts);
-    expect(result).toEqual(expectedPosts);
-
-    expect(supabaseMock.from).toHaveBeenCalledWith("highlight_posts");
-    expect(selectMock).toHaveBeenCalledWith("posts(*, post_sections(name))");
-  });
-
-  /*
-   * 8) getMainHighlights (ERROR)
-   */
-  it("should throw an error when getMainHighlights fails", async () => {
-    const mockError = { message: "Failed to fetch data" };
-
-    const selectMock = vi
-      .fn()
-      .mockResolvedValue({ data: null, error: mockError });
-    (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
-
-    await expect(repository.getMainHighlights()).rejects.toThrow(
-      "Error fetching data: Failed to fetch data",
-    );
-
-    expect(supabaseMock.from).toHaveBeenCalledWith("highlight_posts");
-    expect(selectMock).toHaveBeenCalledWith("posts(*, post_sections(name))");
+      expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+      expect(selectMock).toHaveBeenCalled();
+      expect(orMock).toHaveBeenCalledWith(
+        `name.ilike.%${query}%,surname.ilike.%${query}%`,
+      );
+    });
   });
 });

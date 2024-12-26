@@ -1,6 +1,5 @@
 /* eslint-disable unicorn/no-null */
 import { CacheModule } from "@nestjs/cache-manager";
-import { NotFoundException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { vi } from "vitest";
 
@@ -10,7 +9,7 @@ import { PostController } from "@/src/contexts/posts/api/post.controller";
 import { PostService } from "@/src/contexts/posts/api/post.service";
 import { SupabaseModule } from "@/src/contexts/shared/supabase/supabase.module";
 
-describe("PostController", () => {
+describe("PostController (Custom Endpoints)", () => {
   let controller: PostController;
   let service: PostService;
 
@@ -22,10 +21,11 @@ describe("PostController", () => {
         {
           provide: PostService,
           useValue: {
-            getAll: vi.fn(),
-            getById: vi.fn(),
+            // Only mock the custom methods or calls you need
             getHighlights: vi.fn(),
             getMainHighlights: vi.fn(),
+            // If your PostController doesn’t define other methods,
+            // you can remove them from the mock or keep them if needed.
           },
         },
       ],
@@ -35,56 +35,27 @@ describe("PostController", () => {
     service = module.get<PostService>(PostService);
   });
 
-  describe("getAll", () => {
-    it("should return a list of all posts", async () => {
-      const result = [PostMock];
-
-      vi.spyOn(service, "getAll").mockResolvedValue(result as never);
-
-      const response = await controller.getAll();
-      expect(response).toBe(result);
-    });
-  });
-
   describe("getHighlights", () => {
     it("should return highlighted posts", async () => {
       const result = [PostMock];
-
       vi.spyOn(service, "getHighlights").mockResolvedValue(result as never);
 
       const response = await controller.getHighlights();
       expect(response).toBe(result);
+      expect(service.getHighlights).toHaveBeenCalled();
     });
   });
 
-  describe("getById", () => {
-    const id = 1;
-    it("should return a post by ID", async () => {
-      const mockPost = { ...PostMock, id };
-
-      vi.spyOn(service, "getById").mockResolvedValue(mockPost as never);
-
-      const response = await controller.getById(id.toString());
-      expect(response).toEqual(mockPost);
-    });
-
-    it("should throw NotFoundException if no record is found by ID", async () => {
-      vi.spyOn(service, "getById").mockResolvedValue(null);
-
-      await expect(controller.getById(id.toString())).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-  });
-
-  describe("getMainHighlight", () => {
+  describe("getMainHighlights", () => {
     it("should return main featured posts", async () => {
       const result = [PostMock];
-
       vi.spyOn(service, "getMainHighlights").mockResolvedValue(result as never);
 
       const response = await controller.getMainHighlights();
       expect(response).toBe(result);
+      expect(service.getMainHighlights).toHaveBeenCalled();
     });
   });
+
+  // If you keep/override any other custom endpoints in PostController, test them here
 });

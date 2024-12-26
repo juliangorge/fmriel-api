@@ -15,7 +15,7 @@ export class CreateRainCityDto {
     example: true,
   })
   @IsBoolean()
-  is_active: boolean = true;
+  is_active!: boolean;
 }
 
 export class UpdateRainCityDto {

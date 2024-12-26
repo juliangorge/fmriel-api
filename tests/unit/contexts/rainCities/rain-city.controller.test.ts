@@ -49,35 +49,37 @@ describe("RainCityController", () => {
   describe("getById", () => {
     it("should return a rain city by ID", async () => {
       const id = 1;
-      const mockPharmacies = { ...RainCityMock, id };
+      const mockRainCity = { ...RainCityMock, id };
 
-      vi.spyOn(service, "getById").mockResolvedValue(mockPharmacies as never);
+      vi.spyOn(service, "getById").mockResolvedValue(mockRainCity as never);
 
       const response = await controller.getById(id.toString());
-      expect(response).toEqual(mockPharmacies);
+      expect(response).toEqual(mockRainCity);
     });
   });
 
   describe("create", () => {
     it("should create a new record", async () => {
-      const mockPharmacies = RainCityMock;
+      const mockRainCity = RainCityMock;
 
-      vi.spyOn(service, "create").mockResolvedValue(mockPharmacies as never);
+      vi.spyOn(service, "create").mockResolvedValue(mockRainCity as never);
 
-      const response = await controller.create(mockPharmacies);
-      expect(response).toEqual(mockPharmacies);
+      const response = await controller.create(mockRainCity);
+      expect(response).toEqual(mockRainCity);
+      // Ensure the service was called with the correct DTO
+      expect(service.create).toHaveBeenCalledWith(mockRainCity);
     });
   });
 
   describe("update", () => {
     it("should update a record by ID", async () => {
       const id = 1;
-      const mockPharmacies = { ...RainCityMock, id };
+      const mockRainCity = { ...RainCityMock, id };
 
-      vi.spyOn(service, "update").mockResolvedValue(mockPharmacies as never);
+      vi.spyOn(service, "update").mockResolvedValue(mockRainCity as never);
 
-      const response = await controller.update(id.toString(), mockPharmacies);
-      expect(response).toEqual(mockPharmacies);
+      const response = await controller.update(id.toString(), mockRainCity);
+      expect(response).toEqual(mockRainCity);
     });
   });
 
