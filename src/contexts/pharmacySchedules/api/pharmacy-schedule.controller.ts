@@ -12,6 +12,7 @@ import {
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
+import { validateDto } from "@/src/utils/validateDto";
 
 import { BaseController } from "../../base/api/base.controller";
 import {
@@ -31,8 +32,9 @@ export class PharmacyScheduleController extends BaseController<PharmacyScheduleM
   }
 
   @Post()
-  async create(@Body() createPostDto: CreatePharmacyScheduleDto) {
-    return this.baseService.create(createPostDto);
+  async create(@Body() createDto: CreatePharmacyScheduleDto) {
+    await validateDto(createDto);
+    return this.baseService.create(createDto);
   }
 
   @Put(":id")
@@ -40,6 +42,7 @@ export class PharmacyScheduleController extends BaseController<PharmacyScheduleM
     @Param("id") id: number,
     @Body() updateDto: UpdatePharmacyScheduleDto,
   ) {
+    await validateDto(updateDto);
     return this.baseService.update(id, updateDto);
   }
 

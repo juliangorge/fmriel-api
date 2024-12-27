@@ -2,6 +2,7 @@ import { Body, Controller, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
+import { validateDto } from "@/src/utils/validateDto";
 
 import { BaseController } from "../../base/api/base.controller";
 import { CreatePostSectionDto, UpdatePostSectionDto } from "./post-section.dto";
@@ -19,6 +20,7 @@ export class PostSectionController extends BaseController<PostSectionModel> {
 
   @Post()
   async create(@Body() createDto: CreatePostSectionDto) {
+    await validateDto(createDto);
     return this.baseService.create(createDto);
   }
 
@@ -27,6 +29,7 @@ export class PostSectionController extends BaseController<PostSectionModel> {
     @Param("id") id: number,
     @Body() updateDto: UpdatePostSectionDto,
   ) {
+    await validateDto(updateDto);
     return this.baseService.update(id, updateDto);
   }
 }

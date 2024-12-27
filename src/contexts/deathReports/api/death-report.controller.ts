@@ -2,6 +2,7 @@ import { Body, Controller, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
+import { validateDto } from "@/src/utils/validateDto";
 
 import { BaseController } from "../../base/api/base.controller";
 import { CreateDeathReportDto, UpdateDeathReportDto } from "./death-report.dto";
@@ -18,8 +19,9 @@ export class DeathReportController extends BaseController<DeathReportModel> {
   }
 
   @Post()
-  async create(@Body() createPostDto: CreateDeathReportDto) {
-    return this.baseService.create(createPostDto);
+  async create(@Body() createDto: CreateDeathReportDto) {
+    await validateDto(createDto);
+    return this.baseService.create(createDto);
   }
 
   @Put(":id")
@@ -27,6 +29,7 @@ export class DeathReportController extends BaseController<DeathReportModel> {
     @Param("id") id: number,
     @Body() updateDto: UpdateDeathReportDto,
   ) {
+    await validateDto(updateDto);
     return this.baseService.update(id, updateDto);
   }
 }

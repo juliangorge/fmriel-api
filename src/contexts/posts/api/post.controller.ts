@@ -12,6 +12,7 @@ import {
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
+import { validateDto } from "@/src/utils/validateDto";
 
 import { BaseController } from "@/contexts/base/api/base.controller";
 
@@ -30,11 +31,13 @@ export class PostController extends BaseController<PostModel> {
 
   @Post()
   async create(@Body() createDto: CreatePostDto) {
+    await validateDto(createDto);
     return this.baseService.create(createDto);
   }
 
   @Put(":id")
   async update(@Param("id") id: number, @Body() updateDto: UpdatePostDto) {
+    await validateDto(updateDto);
     return this.baseService.update(id, updateDto);
   }
 

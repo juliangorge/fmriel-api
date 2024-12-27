@@ -2,6 +2,7 @@ import { Body, Controller, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
+import { validateDto } from "@/src/utils/validateDto";
 
 import { BaseController } from "../../base/api/base.controller";
 import { CreatePharmacyDto, UpdatePharmacyDto } from "./pharmacy.dto";
@@ -18,12 +19,14 @@ export class PharmacyController extends BaseController<PharmacyModel> {
   }
 
   @Post()
-  async create(@Body() createPostDto: CreatePharmacyDto) {
-    return this.baseService.create(createPostDto);
+  async create(@Body() createDto: CreatePharmacyDto) {
+    await validateDto(createDto);
+    return this.baseService.create(createDto);
   }
 
   @Put(":id")
   async update(@Param("id") id: number, @Body() updateDto: UpdatePharmacyDto) {
+    await validateDto(updateDto);
     return this.baseService.update(id, updateDto);
   }
 }
