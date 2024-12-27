@@ -51,6 +51,12 @@ export class PharmacyScheduleController extends BaseController<PharmacyScheduleM
   @Get("byDate/:date")
   async getByDate(@Param("date") date: string) {
     const parsedDate = new Date(date);
-    return this.service.getByDate(parsedDate);
+    const result = await this.service.getByDate(parsedDate);
+
+    if (typeof result === "string") {
+      return { message: result };
+    }
+
+    return result;
   }
 }
