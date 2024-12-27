@@ -18,11 +18,6 @@ export class PharmacyScheduleService extends BaseService<PharmacySchedule> {
 
   async getByDate(date: Date): Promise<PharmacySchedule[]> {
     const result = await this.repository.getByDate(date);
-
-    if (typeof result === "string") {
-      throw new TypeError(result);
-    }
-
     return result;
   }
 }

@@ -56,7 +56,19 @@ export class PharmacyScheduleController extends BaseController<PharmacyScheduleM
       return result;
     } catch (error) {
       if (error instanceof Error) {
-        return { message: error.message };
+        // Si el error es por no encontrar farmacias, responde con 404
+        if (error.message === "No pharmacies found for the provided date") {
+          return {
+            statusCode: 404,
+            message: error.message,
+          };
+        }
+
+        // Si es un error general, responde con 500
+        return {
+          statusCode: 500,
+          message: "Internal server error",
+        };
       }
     }
   }

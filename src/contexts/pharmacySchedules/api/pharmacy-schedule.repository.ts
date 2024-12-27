@@ -12,7 +12,7 @@ export class PharmacyScheduleRepository extends BaseRepository<PharmacySchedule>
     super(supabaseProvider, "pharmacy_schedules");
   }
 
-  async getByDate(date: Date): Promise<PharmacySchedule[] | string> {
+  async getByDate(date: Date): Promise<PharmacySchedule[]> {
     const formattedDate = date.toISOString().split("T")[0]; // "2024-10-24"
 
     const startOfDay = `${formattedDate}T00:00:00Z`;
@@ -25,11 +25,11 @@ export class PharmacyScheduleRepository extends BaseRepository<PharmacySchedule>
       .lte("end_date", endOfDay);
 
     if (error) {
-      throw new Error(`Error fetching data: ${error.message}`);
+      throw new Error("Error fetching pharmacy data from the database");
     }
 
     if (!data || data.length === 0) {
-      return "No pharmacies found for this date";
+      throw new Error("No pharmacies found for the provided date");
     }
 
     return data as PharmacySchedule[];
