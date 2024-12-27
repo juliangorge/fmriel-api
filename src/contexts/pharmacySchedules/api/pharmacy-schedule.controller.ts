@@ -50,7 +50,14 @@ export class PharmacyScheduleController extends BaseController<PharmacyScheduleM
   @CacheTTL(3600)
   @Get("byDate/:date")
   async getByDate(@Param("date") date: string) {
-    const parsedDate = new Date(date);
-    return this.service.getByDate(parsedDate);
+    try {
+      const parsedDate = new Date(date);
+      const result = await this.service.getByDate(parsedDate);
+      return result;
+    } catch (error) {
+      if (error instanceof Error) {
+        return { message: error.message };
+      }
+    }
   }
 }
