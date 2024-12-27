@@ -9,12 +9,16 @@ import { SupabaseProvider } from "@/src/contexts/shared/supabase/supabase.provid
 
 describe("PharmacyScheduleService", () => {
   let service: PharmacyScheduleService;
-  let repository: PharmacyScheduleRepository;
-  let supabaseProvider: SupabaseProvider;
+  let repositoryMock: PharmacyScheduleRepository;
+  let supabaseProviderMock: SupabaseProvider;
 
+  // You only need to mock the methods that PharmacyScheduleService (or BaseService) actually calls
   const mockPharmacyScheduleRepository = {
     getAll: vi.fn(),
     getById: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
     getByDate: vi.fn(),
   };
 
@@ -22,47 +26,70 @@ describe("PharmacyScheduleService", () => {
     getClient: vi.fn().mockReturnValue({
       from: vi.fn(),
       auth: {
-        getSession: vi
-          .fn()
-          .mockResolvedValue({ session: { user: { id: "test-user-id" } } }),
+        getSession: vi.fn().mockResolvedValue({
+          session: { user: { id: "test-user-id" } },
+        }),
       },
     }),
   };
 
   beforeEach(() => {
-    repository =
+    repositoryMock =
       mockPharmacyScheduleRepository as unknown as PharmacyScheduleRepository;
-    supabaseProvider = mockSupabaseProvider as unknown as SupabaseProvider;
-    service = new PharmacyScheduleService(supabaseProvider, repository);
-  });
+    supabaseProviderMock = mockSupabaseProvider as unknown as SupabaseProvider;
 
-  afterEach(() => {
+    // Instantiate the PharmacyScheduleService with the mocked repository and provider
+    service = new PharmacyScheduleService(supabaseProviderMock, repositoryMock);
+
+    // Clear calls so each test is isolated
     vi.clearAllMocks();
   });
 
-  it("should return all", async () => {
-    const mock = [PharmacyScheduleMock];
-    mockPharmacyScheduleRepository.getAll.mockReturnValue(mock);
-
-    const response = await service.getAll();
-    expect(response).toBe(mock);
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
-  it("should return by ID", async () => {
-    const id = 1;
-    const mock = { ...PharmacyScheduleMock, id };
-    mockPharmacyScheduleRepository.getById.mockReturnValue(mock);
+  //
+  // If you want integration-style checks for inherited methods, keep these:
+  // (Otherwise, remove them to avoid duplicating the coverage from base.service.test.ts)
+  //
+  describe("Inherited BaseService methods", () => {
+    it("should call repository.getAll and return all posts", async () => {
+      const mockData = [PharmacyScheduleMock];
+      mockPharmacyScheduleRepository.getAll.mockResolvedValueOnce(mockData);
 
-    const response = await service.getById(1);
-    expect(response).toBe(mock);
+      const result = await service.getAll();
+      expect(result).toBe(mockData);
+      expect(repositoryMock.getAll).toHaveBeenCalledOnce();
+    });
+
+    it("should call repository.getById and return a post", async () => {
+      const id = 1;
+      const mockData = { ...PharmacyScheduleMock, id };
+      mockPharmacyScheduleRepository.getById.mockResolvedValueOnce(mockData);
+
+      const result = await service.getById(id);
+      expect(result).toBe(mockData);
+      expect(repositoryMock.getById).toHaveBeenCalledWith(id);
+    });
+
+    // Similarly, you could add tests for create, update, and delete
+    // if you'd like an extra layer of integration checks.
+    // ...
   });
 
-  it("should return by date", async () => {
-    const date = new Date();
-    const mock = [PharmacyScheduleMock];
-    mockPharmacyScheduleRepository.getByDate.mockReturnValue(mock);
+  //
+  // PharmacySchedule-specific methods
+  //
+  describe("Custom PharmacySchedule methods", () => {
+    it("should return records by date", async () => {
+      const date = new Date();
+      const mockData = PharmacyScheduleMock;
+      mockPharmacyScheduleRepository.getByDate.mockResolvedValueOnce(mockData);
 
-    const response = await service.getByDate(date);
-    expect(response).toBe(mock);
+      const result = await service.getByDate(date);
+      expect(result).toBe(mockData);
+      expect(repositoryMock.getByDate).toHaveBeenCalledWith(date);
+    });
   });
 });

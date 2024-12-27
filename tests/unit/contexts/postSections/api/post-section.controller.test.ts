@@ -1,5 +1,4 @@
 /* eslint-disable unicorn/no-null */
-import { CacheModule } from "@nestjs/cache-manager";
 import { Test, TestingModule } from "@nestjs/testing";
 import { vi } from "vitest";
 
@@ -7,7 +6,6 @@ import { PostSectionMock } from "@/tests/utils/mocks/post-section";
 
 import { PostSectionController } from "@/src/contexts/postSections/api/post-section.controller";
 import { PostSectionService } from "@/src/contexts/postSections/api/post-section.service";
-import { SupabaseModule } from "@/src/contexts/shared/supabase/supabase.module";
 
 describe("PostSectionController", () => {
   let controller: PostSectionController;
@@ -15,14 +13,13 @@ describe("PostSectionController", () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [SupabaseModule, CacheModule.register()],
       controllers: [PostSectionController],
       providers: [
         {
           provide: PostSectionService,
           useValue: {
-            getAll: vi.fn(),
-            getById: vi.fn(),
+            create: vi.fn(),
+            update: vi.fn(),
           },
         },
       ],
@@ -32,26 +29,30 @@ describe("PostSectionController", () => {
     service = module.get<PostSectionService>(PostSectionService);
   });
 
-  describe("getAll", () => {
-    it("should return a list of all posts", async () => {
-      const result = [PostSectionMock];
+  it("should be defined", () => {
+    expect(controller).toBeDefined();
+    expect(service).toBeDefined();
+  });
 
-      vi.spyOn(service, "getAll").mockResolvedValue(result as never);
+  describe("create", () => {
+    it("should create a post section", async () => {
+      const result = PostSectionMock;
+      vi.spyOn(service, "create").mockResolvedValue(result as never);
 
-      const response = await controller.getAll();
+      const response = await controller.create(PostSectionMock);
       expect(response).toBe(result);
+      expect(service.create).toHaveBeenCalled();
     });
   });
 
-  describe("getById", () => {
-    it("should return a post section by ID", async () => {
-      const id = 1;
-      const mockPostSection = { ...PostSectionMock, id };
+  describe("update", () => {
+    it("should update a post section", async () => {
+      const result = PostSectionMock;
+      vi.spyOn(service, "update").mockResolvedValue(result as never);
 
-      vi.spyOn(service, "getById").mockResolvedValue(mockPostSection as never);
-
-      const response = await controller.getById(id.toString());
-      expect(response).toEqual(mockPostSection);
+      const response = await controller.update(1, PostSectionMock);
+      expect(response).toBe(result);
+      expect(service.update).toHaveBeenCalled();
     });
   });
 });

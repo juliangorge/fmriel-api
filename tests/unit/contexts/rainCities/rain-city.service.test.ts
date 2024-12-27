@@ -9,82 +9,70 @@ import { SupabaseProvider } from "@/src/contexts/shared/supabase/supabase.provid
 
 describe("RainCityService", () => {
   let service: RainCityService;
-  let repository: RainCityRepository;
-  let supabaseProvider: SupabaseProvider;
+  let repositoryMock: RainCityRepository;
+  let supabaseProviderMock: SupabaseProvider;
 
+  // You only need to mock the methods that RainCityService (or BaseService) actually calls
   const mockRainCityRepository = {
+    getAll: vi.fn(),
+    getById: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
-    getAll: vi.fn(),
-    getById: vi.fn(),
   };
 
   const mockSupabaseProvider = {
     getClient: vi.fn().mockReturnValue({
       from: vi.fn(),
       auth: {
-        getSession: vi
-          .fn()
-          .mockResolvedValue({ session: { user: { id: "test-user-id" } } }),
+        getSession: vi.fn().mockResolvedValue({
+          session: { user: { id: "test-user-id" } },
+        }),
       },
     }),
   };
 
   beforeEach(() => {
-    repository = mockRainCityRepository as unknown as RainCityRepository;
-    supabaseProvider = mockSupabaseProvider as unknown as SupabaseProvider;
-    service = new RainCityService(supabaseProvider, repository);
-  });
+    repositoryMock = mockRainCityRepository as unknown as RainCityRepository;
+    supabaseProviderMock = mockSupabaseProvider as unknown as SupabaseProvider;
 
-  afterEach(() => {
+    // Instantiate the RainCityService with the mocked repository and provider
+    service = new RainCityService(supabaseProviderMock, repositoryMock);
+
+    // Clear calls so each test is isolated
     vi.clearAllMocks();
   });
 
-  it("should return all", async () => {
-    const mock = [RainCityMock];
-    mockRainCityRepository.getAll.mockReturnValue(mock);
-
-    const response = await service.getAll();
-    expect(response).toBe(mock);
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
-  it("should return by ID", async () => {
-    const id = 1;
-    const mock = { ...RainCityMock, id };
-    mockRainCityRepository.getById.mockReturnValue(mock);
+  //
+  // If you want integration-style checks for inherited methods, keep these:
+  // (Otherwise, remove them to avoid duplicating the coverage from base.service.test.ts)
+  //
+  describe("Inherited BaseService methods", () => {
+    it("should call repository.getAll and return all posts", async () => {
+      const mockData = [RainCityMock];
+      mockRainCityRepository.getAll.mockResolvedValueOnce(mockData);
 
-    const response = await service.getById(1);
-    expect(response).toBe(mock);
-  });
+      const result = await service.getAll();
+      expect(result).toBe(mockData);
+      expect(repositoryMock.getAll).toHaveBeenCalledOnce();
+    });
 
-  it("should create a new record", async () => {
-    const mock = RainCityMock;
-    mockRainCityRepository.create.mockReturnValue(mock);
+    it("should call repository.getById and return a post", async () => {
+      const id = 1;
+      const mockData = { ...RainCityMock, id };
+      mockRainCityRepository.getById.mockResolvedValueOnce(mockData);
 
-    const response = await service.create(mock);
-    expect(response).toBe(mock);
-  });
+      const result = await service.getById(id);
+      expect(result).toBe(mockData);
+      expect(repositoryMock.getById).toHaveBeenCalledWith(id);
+    });
 
-  it("should update a record", async () => {
-    const id = 1;
-    const mock = { ...RainCityMock, id };
-    mockRainCityRepository.getById.mockReturnValue(mock);
-
-    mockRainCityRepository.update.mockReturnValue(mock);
-
-    const response = await service.update(id, mock);
-    expect(response).toBe(mock);
-  });
-
-  it("should delete a record", async () => {
-    const id = 1;
-    const mock = { ...RainCityMock, id };
-    mockRainCityRepository.getById.mockReturnValue(mock);
-
-    mockRainCityRepository.delete.mockReturnValue(mock);
-
-    const response = await service.delete(id);
-    expect(response).toBe(mock);
+    // Similarly, you could add tests for create, update, and delete
+    // if you'd like an extra layer of integration checks.
+    // ...
   });
 });

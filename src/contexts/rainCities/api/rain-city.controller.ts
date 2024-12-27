@@ -1,60 +1,29 @@
-import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-  UseInterceptors,
-} from "@nestjs/common";
-import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
+
+import { BaseController } from "../../base/api/base.controller";
 import { CreateRainCityDto, UpdateRainCityDto } from "./rain-city.dto";
+import { RainCity as RainCityModel } from "./rain-city.model";
 import { RainCityService } from "./rain-city.service";
 
-@Controller("rainCities")
 @ApiTags("Rain Cities")
+@Controller("rainCities")
+@UseGuards(SupabaseAuthGuard)
 @ApiBearerAuth("access-token")
-export class RainCityController {
-  constructor(protected readonly rainCityService: RainCityService) {}
-
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(3600 * 24) // 24 hours
-  @Get()
-  @ApiOperation({ summary: "Get all rain cities" })
-  getAll() {
-    return this.rainCityService.getAll();
-  }
-
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(3600 * 24) // 24 hours
-  @Get(":id")
-  @ApiOperation({ summary: "Get rain city by ID" })
-  getById(@Param("id") id: string) {
-    const rainCityId = Number.parseInt(id, 10);
-    return this.rainCityService.getById(rainCityId);
+export class RainCityController extends BaseController<RainCityModel> {
+  constructor(protected readonly service: RainCityService) {
+    super(service);
   }
 
   @Post()
-  @ApiOperation({ summary: "Create a new rain city" })
-  create(@Body() createRainCityDto: CreateRainCityDto) {
-    return this.rainCityService.create(createRainCityDto);
+  async create(@Body() createDto: CreateRainCityDto) {
+    return this.baseService.create(createDto);
   }
 
-  @Patch(":id")
-  @ApiOperation({ summary: "Update an existing rain city by ID" })
-  update(
-    @Param("id") id: string,
-    @Body() updateRainCityDto: UpdateRainCityDto,
-  ) {
-    const rainCityId = Number.parseInt(id, 10);
-    return this.rainCityService.update(rainCityId, updateRainCityDto);
-  }
-
-  @Delete(":id")
-  delete(@Param("id") id: number) {
-    return this.rainCityService.delete(id);
+  @Put(":id")
+  async update(@Param("id") id: number, @Body() updateDto: UpdateRainCityDto) {
+    return this.baseService.update(id, updateDto);
   }
 }

@@ -3,6 +3,8 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 
+import { PostSectionMock } from "@/tests/utils/mocks/post-section";
+
 import { PostSection } from "@/src/contexts/postSections/api/post-section.model";
 import { PostSectionRepository } from "@/src/contexts/postSections/api/post-section.repository";
 
@@ -15,82 +17,106 @@ describe("PostSectionRepository", () => {
   const tableName = "post_sections";
 
   beforeEach(() => {
-    // Base supabase mock
+    // Mock supabase client
     supabaseMock = {
-      from: vi.fn(), // We'll chain off this in each test
+      from: vi.fn(), // We'll chain .select(), .eq(), .maybeSingle(), etc. on this
     } as unknown as SupabaseClient;
 
-    // Mock provider to return the supabaseMock
+    // Mock provider to return our mocked supabase client
     supabaseProviderMock = {
       getClient: vi.fn().mockReturnValue(supabaseMock),
     } as unknown as SupabaseProvider;
 
-    // Instantiate repository
+    // Instantiate the actual repository with the mocked provider
     repository = new PostSectionRepository(supabaseProviderMock);
-  });
 
-  afterEach(() => {
+    // Clear calls so each test starts fresh
     vi.clearAllMocks();
   });
 
-  it("should fetch all records in getAll (SUCCESS)", async () => {
-    const mockData: PostSection[] = [
-      { id: 1, name: "Culture" },
-      { id: 2, name: "Sports" },
-    ];
+  describe("getAll", () => {
+    it("should fetch all records (success)", async () => {
+      const mockData: PostSection[] = [PostSectionMock, PostSectionMock];
 
-    // 1. Final link in chain: range(...) -> returns a Promise
-    const rangeMock = vi.fn().mockResolvedValue({
-      data: mockData,
-      error: null,
+      // If you do ordering/pagination, you'll have something like:
+      // .select() -> .order() -> .range().
+      // Here’s the full chain if you rely on the BaseRepository’s logic:
+
+      const rangeMock = vi
+        .fn()
+        .mockResolvedValue({ data: mockData, error: null });
+      const orderMock = vi.fn().mockReturnValue({ range: rangeMock });
+      const selectMock = vi.fn().mockReturnValue({ order: orderMock });
+
+      (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
+
+      // Act
+      const result = await repository.getAll(); // Default limit=10, offset=0, etc.
+
+      // Assert
+      expect(result).toEqual(mockData);
+      expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+      expect(selectMock).toHaveBeenCalled(); // or .toHaveBeenCalledWith() if you pass arguments
+      expect(orderMock).toHaveBeenCalledWith("id", { ascending: true });
+      expect(rangeMock).toHaveBeenCalledWith(0, 9); // offset=0, limit=10 => 0..9
     });
-    // 2. Next link: order(...) returns an object with range
-    const orderMock = vi.fn().mockReturnValue({ range: rangeMock });
-    // 3. Next link: select(...) returns an object with order
-    const selectMock = vi.fn().mockReturnValue({ order: orderMock });
 
-    // 4. .from(tableName) returns an object with select
-    (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
+    it("should throw an error when getAll fails", async () => {
+      const mockError = { message: "Failed to fetch data" };
 
-    const result = await repository.getAll();
-    // If your getAll calls .order(...).range(...), this chain will be used
+      const rangeMock = vi
+        .fn()
+        .mockResolvedValue({ data: null, error: mockError });
+      const orderMock = vi.fn().mockReturnValue({ range: rangeMock });
+      const selectMock = vi.fn().mockReturnValue({ order: orderMock });
+      (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
 
-    expect(result).toEqual(mockData);
-
-    // Check the chain
-    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-    expect(selectMock).toHaveBeenCalled();
-    expect(orderMock).toHaveBeenCalledWith("id", { ascending: true });
-    // default sort? depends on your repository
-    expect(rangeMock).toHaveBeenCalledWith(0, 9);
-    // default offset=0, limit=10 => range(0, 9)
+      await expect(repository.getAll()).rejects.toThrow(
+        "Error fetching data: Failed to fetch data",
+      );
+      expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+    });
   });
 
-  /*
-   * getAll (ERROR)
-   */
-  it("should throw an error when getAll fails", async () => {
-    const mockError = { message: "Failed to fetch data" };
+  describe("getById", () => {
+    it("should fetch a record by ID (success)", async () => {
+      const mockPostSection: PostSection = PostSectionMock;
 
-    // Build the chain but return an error at the final step
-    const rangeMock = vi.fn().mockResolvedValue({
-      data: null,
-      error: mockError,
+      const maybeSingleMock = vi
+        .fn()
+        .mockResolvedValue({ data: mockPostSection, error: null });
+      const eqMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
+      const selectMock = vi.fn().mockReturnValue({ eq: eqMock });
+
+      (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
+
+      // Act
+      const result = await repository.getById(1);
+
+      // Assert
+      expect(result).toEqual(mockPostSection);
+      expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+      expect(selectMock).toHaveBeenCalled();
+      expect(eqMock).toHaveBeenCalledWith("id", 1);
+      expect(maybeSingleMock).toHaveBeenCalled();
     });
-    const orderMock = vi.fn().mockReturnValue({ range: rangeMock });
-    const selectMock = vi.fn().mockReturnValue({ order: orderMock });
 
-    (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
+    it("should throw an error when getById fails", async () => {
+      const mockError = { message: "Failed to fetch data" };
 
-    await expect(repository.getAll()).rejects.toThrow(
-      "Error fetching data: Failed to fetch data",
-    );
+      const maybeSingleMock = vi
+        .fn()
+        .mockResolvedValue({ data: null, error: mockError });
+      const eqMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
+      const selectMock = vi.fn().mockReturnValue({ eq: eqMock });
 
-    expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-    expect(selectMock).toHaveBeenCalled();
-    expect(orderMock).toHaveBeenCalledWith("id", { ascending: true });
-    expect(rangeMock).toHaveBeenCalledWith(0, 9);
+      (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
+
+      await expect(repository.getById(1)).rejects.toThrow(
+        "Error fetching data: Failed to fetch data",
+      );
+      expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+      expect(selectMock).toHaveBeenCalled();
+    });
   });
-
-  // ... other tests (getById, etc.) follow the same pattern
 });

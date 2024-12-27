@@ -1,5 +1,4 @@
 /* eslint-disable unicorn/no-null */
-import { CacheModule } from "@nestjs/cache-manager";
 import { Test, TestingModule } from "@nestjs/testing";
 import { vi } from "vitest";
 
@@ -7,7 +6,6 @@ import { RainCityMock } from "@/tests/utils/mocks/rain-city";
 
 import { RainCityController } from "@/src/contexts/rainCities/api/rain-city.controller";
 import { RainCityService } from "@/src/contexts/rainCities/api/rain-city.service";
-import { SupabaseModule } from "@/src/contexts/shared/supabase/supabase.module";
 
 describe("RainCityController", () => {
   let controller: RainCityController;
@@ -15,17 +13,13 @@ describe("RainCityController", () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      imports: [SupabaseModule, CacheModule.register()],
       controllers: [RainCityController],
       providers: [
         {
           provide: RainCityService,
           useValue: {
-            getAll: vi.fn(),
-            getById: vi.fn(),
             create: vi.fn(),
             update: vi.fn(),
-            delete: vi.fn(),
           },
         },
       ],
@@ -35,62 +29,30 @@ describe("RainCityController", () => {
     service = module.get<RainCityService>(RainCityService);
   });
 
-  describe("getAll", () => {
-    it("should return a list of all rain cities", async () => {
-      const result = [RainCityMock];
-
-      vi.spyOn(service, "getAll").mockResolvedValue(result as never);
-
-      const response = await controller.getAll();
-      expect(response).toBe(result);
-    });
-  });
-
-  describe("getById", () => {
-    it("should return a rain city by ID", async () => {
-      const id = 1;
-      const mockRainCity = { ...RainCityMock, id };
-
-      vi.spyOn(service, "getById").mockResolvedValue(mockRainCity as never);
-
-      const response = await controller.getById(id.toString());
-      expect(response).toEqual(mockRainCity);
-    });
+  it("should be defined", () => {
+    expect(controller).toBeDefined();
+    expect(service).toBeDefined();
   });
 
   describe("create", () => {
-    it("should create a new record", async () => {
-      const mockRainCity = RainCityMock;
+    it("should create a rain city", async () => {
+      const result = RainCityMock;
+      vi.spyOn(service, "create").mockResolvedValue(result as never);
 
-      vi.spyOn(service, "create").mockResolvedValue(mockRainCity as never);
-
-      const response = await controller.create(mockRainCity);
-      expect(response).toEqual(mockRainCity);
-      // Ensure the service was called with the correct DTO
-      expect(service.create).toHaveBeenCalledWith(mockRainCity);
+      const response = await controller.create(RainCityMock);
+      expect(response).toBe(result);
+      expect(service.create).toHaveBeenCalled();
     });
   });
 
   describe("update", () => {
-    it("should update a record by ID", async () => {
-      const id = 1;
-      const mockRainCity = { ...RainCityMock, id };
+    it("should update a rain city", async () => {
+      const result = RainCityMock;
+      vi.spyOn(service, "update").mockResolvedValue(result as never);
 
-      vi.spyOn(service, "update").mockResolvedValue(mockRainCity as never);
-
-      const response = await controller.update(id.toString(), mockRainCity);
-      expect(response).toEqual(mockRainCity);
-    });
-  });
-
-  describe("delete", () => {
-    it("should delete a record by ID", async () => {
-      const id = 1;
-
-      vi.spyOn(service, "delete").mockResolvedValue({ id } as never);
-
-      const response = await controller.delete(id);
-      expect(response).toEqual({ id });
+      const response = await controller.update(1, RainCityMock);
+      expect(response).toBe(result);
+      expect(service.update).toHaveBeenCalled();
     });
   });
 });

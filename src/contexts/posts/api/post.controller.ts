@@ -1,14 +1,25 @@
 import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
-import { Controller, Get, UseGuards, UseInterceptors } from "@nestjs/common";
-import { ApiBearerAuth } from "@nestjs/swagger";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
 
 import { BaseController } from "@/contexts/base/api/base.controller";
 
+import { CreatePostDto, UpdatePostDto } from "./post.dto";
 import { Post as PostModel } from "./post.model";
 import { PostService } from "./post.service";
 
+@ApiTags("Posts")
 @Controller("posts")
 @UseGuards(SupabaseAuthGuard)
 @ApiBearerAuth("access-token")
@@ -17,7 +28,15 @@ export class PostController extends BaseController<PostModel> {
     super(service);
   }
 
-  // You can still add extra endpoints here if needed
+  @Post()
+  async create(@Body() createDto: CreatePostDto) {
+    return this.baseService.create(createDto);
+  }
+
+  @Put(":id")
+  async update(@Param("id") id: number, @Body() updateDto: UpdatePostDto) {
+    return this.baseService.update(id, updateDto);
+  }
 
   @UseInterceptors(CacheInterceptor)
   @CacheTTL(3600)
@@ -32,6 +51,4 @@ export class PostController extends BaseController<PostModel> {
   getMainHighlights() {
     return this.service.getMainHighlights();
   }
-
-  // etc...
 }

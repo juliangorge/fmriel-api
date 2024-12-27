@@ -11,19 +11,4 @@ export class DeathReportRepository extends BaseRepository<DeathReport> {
   constructor(protected supabaseProvider: SupabaseProvider) {
     super(supabaseProvider, "death_reports");
   }
-
-  async findByQuery(query: string): Promise<DeathReport[]> {
-    const { data, error } = await this.supabase
-      .from(this.tableName)
-      .select()
-      .or(`name.ilike.%${query}%,surname.ilike.%${query}%`);
-
-    if (error) {
-      throw new Error(
-        `Error fetching death records by query in name or surname: ${error.message}`,
-      );
-    }
-
-    return data as DeathReport[];
-  }
 }

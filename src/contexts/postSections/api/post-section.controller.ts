@@ -1,29 +1,32 @@
-import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
-import { Controller, Get, Param, UseInterceptors } from "@nestjs/common";
-import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
+import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
+
+import { BaseController } from "../../base/api/base.controller";
+import { CreatePostSectionDto, UpdatePostSectionDto } from "./post-section.dto";
+import { PostSection as PostSectionModel } from "./post-section.model";
 import { PostSectionService } from "./post-section.service";
 
-@Controller("postSections")
 @ApiTags("Post Sections")
+@Controller("postSections")
+@UseGuards(SupabaseAuthGuard)
 @ApiBearerAuth("access-token")
-export class PostSectionController {
-  constructor(protected readonly postSectionService: PostSectionService) {}
-
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(3600 * 24) // 24 hours
-  @Get()
-  @ApiOperation({ summary: "Get all post sections" })
-  getAll() {
-    return this.postSectionService.getAll();
+export class PostSectionController extends BaseController<PostSectionModel> {
+  constructor(protected readonly service: PostSectionService) {
+    super(service);
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(3600 * 24) // 24 hours
-  @Get(":id")
-  @ApiOperation({ summary: "Get post section by ID" })
-  getById(@Param("id") id: string) {
-    const postSectionId = Number.parseInt(id, 10);
-    return this.postSectionService.getById(postSectionId);
+  @Post()
+  async create(@Body() createDto: CreatePostSectionDto) {
+    return this.baseService.create(createDto);
+  }
+
+  @Put(":id")
+  async update(
+    @Param("id") id: number,
+    @Body() updateDto: UpdatePostSectionDto,
+  ) {
+    return this.baseService.update(id, updateDto);
   }
 }

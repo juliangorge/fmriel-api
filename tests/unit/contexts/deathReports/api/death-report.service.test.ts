@@ -9,59 +9,71 @@ import { SupabaseProvider } from "@/src/contexts/shared/supabase/supabase.provid
 
 describe("DeathReportService", () => {
   let service: DeathReportService;
-  let repository: DeathReportRepository;
-  let supabaseProvider: SupabaseProvider;
+  let repositoryMock: DeathReportRepository;
+  let supabaseProviderMock: SupabaseProvider;
 
+  // You only need to mock the methods that DeathReportService (or BaseService) actually calls
   const mockDeathReportRepository = {
     getAll: vi.fn(),
     getById: vi.fn(),
-    findByQuery: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
   };
 
   const mockSupabaseProvider = {
     getClient: vi.fn().mockReturnValue({
       from: vi.fn(),
       auth: {
-        getSession: vi
-          .fn()
-          .mockResolvedValue({ session: { user: { id: "test-user-id" } } }),
+        getSession: vi.fn().mockResolvedValue({
+          session: { user: { id: "test-user-id" } },
+        }),
       },
     }),
   };
 
   beforeEach(() => {
-    repository = mockDeathReportRepository as unknown as DeathReportRepository;
-    supabaseProvider = mockSupabaseProvider as unknown as SupabaseProvider;
-    service = new DeathReportService(supabaseProvider, repository);
-  });
+    repositoryMock =
+      mockDeathReportRepository as unknown as DeathReportRepository;
+    supabaseProviderMock = mockSupabaseProvider as unknown as SupabaseProvider;
 
-  afterEach(() => {
+    // Instantiate the DeathReportService with the mocked repository and provider
+    service = new DeathReportService(supabaseProviderMock, repositoryMock);
+
+    // Clear calls so each test is isolated
     vi.clearAllMocks();
   });
 
-  it("should return all", async () => {
-    const mock = [DeathReportMock];
-    mockDeathReportRepository.getAll.mockReturnValue(mock);
-
-    const response = await service.getAll();
-    expect(response).toBe(mock);
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
-  it("should return by ID", async () => {
-    const id = 1;
-    const mock = { ...DeathReportMock, id };
-    mockDeathReportRepository.getById.mockReturnValue(mock);
+  //
+  // If you want integration-style checks for inherited methods, keep these:
+  // (Otherwise, remove them to avoid duplicating the coverage from base.service.test.ts)
+  //
+  describe("Inherited BaseService methods", () => {
+    it("should call repository.getAll and return all posts", async () => {
+      const mockData = [DeathReportMock];
+      mockDeathReportRepository.getAll.mockResolvedValueOnce(mockData);
 
-    const response = await service.getById(1);
-    expect(response).toBe(mock);
-  });
+      const result = await service.getAll();
+      expect(result).toBe(mockData);
+      expect(repositoryMock.getAll).toHaveBeenCalledOnce();
+    });
 
-  it("should return by query", async () => {
-    const query = "test";
-    const mock = [DeathReportMock];
-    mockDeathReportRepository.findByQuery.mockReturnValue(mock);
+    it("should call repository.getById and return a post", async () => {
+      const id = 1;
+      const mockData = { ...DeathReportMock, id };
+      mockDeathReportRepository.getById.mockResolvedValueOnce(mockData);
 
-    const response = await service.findByQuery(query);
-    expect(response).toBe(mock);
+      const result = await service.getById(id);
+      expect(result).toBe(mockData);
+      expect(repositoryMock.getById).toHaveBeenCalledWith(id);
+    });
+
+    // Similarly, you could add tests for create, update, and delete
+    // if you'd like an extra layer of integration checks.
+    // ...
   });
 });

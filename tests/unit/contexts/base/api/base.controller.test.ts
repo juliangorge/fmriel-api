@@ -77,6 +77,29 @@ describe("BaseController", () => {
     );
   });
 
+  it("should use default query params if none are provided", async () => {
+    // Arrange
+    // (No arguments provided, so we rely on defaults.)
+
+    // Act
+    await controller.getAll();
+    // Alternatively, await controller.getAll(undefined, undefined, undefined, undefined);
+
+    // Assert
+    expect(mockService.getAll).toHaveBeenCalledOnce();
+    // By default:
+    //   page = 1 => offset = 0
+    //   limit = 10
+    //   sortBy = "id"
+    //   desc = false => ascending = true
+    expect(mockService.getAll).toHaveBeenCalledWith(
+      10, // default limit
+      0, // (page - 1) * limit = (1 - 1) * 10 = 0
+      "id",
+      true, // ascending = !desc = !false = true
+    );
+  });
+
   //
   // 5. Test `getById` method
   //

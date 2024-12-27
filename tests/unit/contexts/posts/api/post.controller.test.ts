@@ -22,6 +22,8 @@ describe("PostController (Custom Endpoints)", () => {
           provide: PostService,
           useValue: {
             // Only mock the custom methods or calls you need
+            create: vi.fn(),
+            update: vi.fn(),
             getHighlights: vi.fn(),
             getMainHighlights: vi.fn(),
             // If your PostController doesn’t define other methods,
@@ -33,6 +35,33 @@ describe("PostController (Custom Endpoints)", () => {
 
     controller = module.get<PostController>(PostController);
     service = module.get<PostService>(PostService);
+  });
+
+  it("should be defined", () => {
+    expect(controller).toBeDefined();
+    expect(service).toBeDefined();
+  });
+
+  describe("create", () => {
+    it("should create a post", async () => {
+      const result = PostMock;
+      vi.spyOn(service, "create").mockResolvedValue(result as never);
+
+      const response = await controller.create(PostMock);
+      expect(response).toBe(result);
+      expect(service.create).toHaveBeenCalled();
+    });
+  });
+
+  describe("update", () => {
+    it("should update a post", async () => {
+      const result = PostMock;
+      vi.spyOn(service, "update").mockResolvedValue(result as never);
+
+      const response = await controller.update(1, PostMock);
+      expect(response).toBe(result);
+      expect(service.update).toHaveBeenCalled();
+    });
   });
 
   describe("getHighlights", () => {

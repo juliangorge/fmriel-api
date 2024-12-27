@@ -15,8 +15,4 @@ export class DeathReportService extends BaseService<DeathReport> {
   ) {
     super(supabaseProvider, repository);
   }
-
-  async findByQuery(query: string): Promise<DeathReport[]> {
-    return this.repository.findByQuery(query);
-  }
 }

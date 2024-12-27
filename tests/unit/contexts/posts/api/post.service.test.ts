@@ -9,12 +9,16 @@ import { SupabaseProvider } from "@/src/contexts/shared/supabase/supabase.provid
 
 describe("PostService", () => {
   let service: PostService;
-  let repository: PostRepository;
-  let supabaseProvider: SupabaseProvider;
+  let repositoryMock: PostRepository;
+  let supabaseProviderMock: SupabaseProvider;
 
+  // You only need to mock the methods that PostService (or BaseService) actually calls
   const mockPostRepository = {
     getAll: vi.fn(),
     getById: vi.fn(),
+    create: vi.fn(),
+    update: vi.fn(),
+    delete: vi.fn(),
     getHighlights: vi.fn(),
     getMainHighlights: vi.fn(),
   };
@@ -23,53 +27,79 @@ describe("PostService", () => {
     getClient: vi.fn().mockReturnValue({
       from: vi.fn(),
       auth: {
-        getSession: vi
-          .fn()
-          .mockResolvedValue({ session: { user: { id: "test-user-id" } } }),
+        getSession: vi.fn().mockResolvedValue({
+          session: { user: { id: "test-user-id" } },
+        }),
       },
     }),
   };
 
   beforeEach(() => {
-    repository = mockPostRepository as unknown as PostRepository;
-    supabaseProvider = mockSupabaseProvider as unknown as SupabaseProvider;
-    service = new PostService(supabaseProvider, repository);
-  });
+    repositoryMock = mockPostRepository as unknown as PostRepository;
+    supabaseProviderMock = mockSupabaseProvider as unknown as SupabaseProvider;
 
-  afterEach(() => {
+    // Instantiate the PostService with the mocked repository and provider
+    service = new PostService(supabaseProviderMock, repositoryMock);
+
+    // Clear calls so each test is isolated
     vi.clearAllMocks();
   });
 
-  it("should return all", async () => {
-    const mock = [PostMock];
-    mockPostRepository.getAll.mockReturnValue(mock);
-
-    const response = await service.getAll();
-    expect(response).toBe(mock);
+  afterEach(() => {
+    vi.resetAllMocks();
   });
 
-  it("should return by ID", async () => {
-    const id = 1;
-    const mock = { ...PostMock, id };
-    mockPostRepository.getById.mockReturnValue(mock);
+  //
+  // If you want integration-style checks for inherited methods, keep these:
+  // (Otherwise, remove them to avoid duplicating the coverage from base.service.test.ts)
+  //
+  describe("Inherited BaseService methods", () => {
+    it("should call repository.getAll and return all posts", async () => {
+      const mockData = [PostMock];
+      mockPostRepository.getAll.mockResolvedValueOnce(mockData);
 
-    const response = await service.getById(1);
-    expect(response).toBe(mock);
+      const result = await service.getAll();
+      expect(result).toBe(mockData);
+      expect(repositoryMock.getAll).toHaveBeenCalledOnce();
+    });
+
+    it("should call repository.getById and return a post", async () => {
+      const id = 1;
+      const mockData = { ...PostMock, id };
+      mockPostRepository.getById.mockResolvedValueOnce(mockData);
+
+      const result = await service.getById(id);
+      expect(result).toBe(mockData);
+      expect(repositoryMock.getById).toHaveBeenCalledWith(id);
+    });
+
+    // Similarly, you could add tests for create, update, and delete
+    // if you'd like an extra layer of integration checks.
+    // ...
   });
 
-  it("should return highlighted posts", async () => {
-    const mock = [PostMock];
-    mockPostRepository.getHighlights.mockReturnValue(mock);
+  //
+  // PostService-specific methods
+  //
+  describe("Custom PostService methods", () => {
+    it("should return highlighted posts", async () => {
+      const mockHighlights = [PostMock];
+      mockPostRepository.getHighlights.mockResolvedValueOnce(mockHighlights);
 
-    const response = await service.getHighlights();
-    expect(response).toBe(mock);
-  });
+      const result = await service.getHighlights();
+      expect(result).toBe(mockHighlights);
+      expect(repositoryMock.getHighlights).toHaveBeenCalledOnce();
+    });
 
-  it("should return main highlighted posts", async () => {
-    const mock = [PostMock];
-    mockPostRepository.getMainHighlights.mockReturnValue(mock);
+    it("should return main highlighted posts", async () => {
+      const mockMainHighlights = [PostMock];
+      mockPostRepository.getMainHighlights.mockResolvedValueOnce(
+        mockMainHighlights,
+      );
 
-    const response = await service.getMainHighlights();
-    expect(response).toBe(mock);
+      const result = await service.getMainHighlights();
+      expect(result).toBe(mockMainHighlights);
+      expect(repositoryMock.getMainHighlights).toHaveBeenCalledOnce();
+    });
   });
 });

@@ -1,67 +1,29 @@
-import { CacheInterceptor, CacheTTL } from "@nestjs/cache-manager";
-import {
-  Body,
-  Controller,
-  Get,
-  NotFoundException,
-  Param,
-  Post,
-  Put,
-  UseGuards,
-  UseInterceptors,
-} from "@nestjs/common";
-import { ApiBearerAuth } from "@nestjs/swagger";
+import { Body, Controller, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 import { SupabaseAuthGuard } from "@/src/app/auth/guards/supabase-auth-guard";
-import { validateDto } from "@/src/utils/validateDto";
 
+import { BaseController } from "../../base/api/base.controller";
 import { CreatePharmacyDto, UpdatePharmacyDto } from "./pharmacy.dto";
+import { Pharmacy as PharmacyModel } from "./pharmacy.model";
 import { PharmacyService } from "./pharmacy.service";
 
+@ApiTags("Pharmacies")
 @Controller("pharmacies")
 @UseGuards(SupabaseAuthGuard)
 @ApiBearerAuth("access-token")
-export class PharmacyController {
-  constructor(protected readonly service: PharmacyService) {}
-
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(3600) // 1 hora
-  @Get()
-  getAll() {
-    return this.service.getAll();
-  }
-
-  @UseInterceptors(CacheInterceptor)
-  @CacheTTL(3600)
-  @Get(":id")
-  async getById(@Param("id") id: string) {
-    const pharmacyId = Number.parseInt(id, 10);
-    const pharmacy = await this.service.getById(pharmacyId);
-    if (!pharmacy) {
-      throw new NotFoundException();
-    }
-
-    return pharmacy;
+export class PharmacyController extends BaseController<PharmacyModel> {
+  constructor(protected readonly service: PharmacyService) {
+    super(service);
   }
 
   @Post()
-  async create(@Body() createPharmacyDto: CreatePharmacyDto) {
-    await validateDto(createPharmacyDto);
-    return this.service.create(createPharmacyDto);
+  async create(@Body() createPostDto: CreatePharmacyDto) {
+    return this.baseService.create(createPostDto);
   }
 
   @Put(":id")
-  async update(
-    @Param("id") id: string,
-    @Body() updatePharmacyDto: UpdatePharmacyDto,
-  ) {
-    const pharmacyId = Number.parseInt(id, 10);
-    await validateDto(updatePharmacyDto);
-    const pharmacy = await this.service.update(pharmacyId, updatePharmacyDto);
-    if (!pharmacy) {
-      throw new NotFoundException();
-    }
-
-    return pharmacy;
+  async update(@Param("id") id: number, @Body() updateDto: UpdatePharmacyDto) {
+    return this.baseService.update(id, updateDto);
   }
 }
