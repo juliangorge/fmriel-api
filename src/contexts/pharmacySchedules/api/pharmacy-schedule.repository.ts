@@ -13,7 +13,7 @@ export class PharmacyScheduleRepository extends BaseRepository<PharmacySchedule>
   }
 
   async getByDate(date: Date): Promise<PharmacySchedule[]> {
-    const formattedDate = date.toISOString().split("T")[0]; // "2024-10-24"
+    const formattedDate = new Date(date).toISOString().split("T")[0];
 
     const startOfDay = `${formattedDate}T00:00:00Z`;
     const endOfDay = `${formattedDate}T23:59:59Z`;
@@ -25,11 +25,11 @@ export class PharmacyScheduleRepository extends BaseRepository<PharmacySchedule>
       .lte("end_date", endOfDay);
 
     if (error) {
-      throw new Error("Error fetching pharmacy data from the database");
+      throw new Error(`Error fetching data: ${error.message}`);
     }
 
     if (!data || data.length === 0) {
-      throw new Error("No pharmacies found for the provided date");
+      throw new Error("Error fetching data: Failed to fetch data");
     }
 
     return data as PharmacySchedule[];
