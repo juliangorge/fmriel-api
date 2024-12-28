@@ -23,13 +23,8 @@ export class PharmacyScheduleRepository extends BaseRepository<PharmacySchedule>
       .select("id, pharmacy_id, start_date, end_date")
       .gte("start_date", startOfDay)
       .lte("end_date", endOfDay);
-
     if (error) {
       throw new Error(`Error fetching data: ${error.message}`);
-    }
-
-    if (!data || data.length === 0) {
-      throw new Error("Error fetching data: Failed to fetch data");
     }
 
     return data as PharmacySchedule[];

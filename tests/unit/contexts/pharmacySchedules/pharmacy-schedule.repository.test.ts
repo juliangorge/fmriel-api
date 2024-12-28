@@ -125,48 +125,71 @@ describe("PharmacyScheduleRepository", () => {
 
   describe("getByDate", () => {
     it("should fetch a pharmacy schedule by date (success)", async () => {
-      const mockPharmacySchedule: PharmacySchedule = PharmacyScheduleMock;
-      const formattedDate = "2022-01-01";
+      // Arrange
+      const mockPharmacySchedule = PharmacyScheduleMock;
 
-      const maybeSingleMock = vi
+      // The input date to be tested
+      const inputDate = new Date("2025-01-01T10:00:00Z");
+
+      // Expected start and end of day
+      const formattedDate = inputDate.toISOString().split("T")[0];
+      const startOfDay = `${formattedDate}T00:00:00Z`;
+      const endOfDay = `${formattedDate}T23:59:59Z`;
+
+      // Mocking Supabase methods
+      const lteMock = vi
         .fn()
-        .mockResolvedValue({ data: mockPharmacySchedule, error: null });
-      const lteMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
-      const gteMock = vi.fn().mockReturnValue({ lte: lteMock });
+        .mockReturnValue({ data: [mockPharmacySchedule], error: null });
+      const gteMock = vi.fn().mockReturnValue({
+        lte: lteMock,
+      });
       const selectMock = vi.fn().mockReturnValue({ gte: gteMock });
 
+      // Mock the "from" function in supabase
       (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
 
       // Act
-      const result = await repository.getByDate(new Date(formattedDate));
+      const result = await repository.getByDate(inputDate);
 
       // Assert
-      expect(result).toEqual(mockPharmacySchedule);
-      expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+      expect(result).toEqual([mockPharmacySchedule]);
+      expect(supabaseMock.from).toHaveBeenCalledWith("pharmacy_schedules");
       expect(selectMock).toHaveBeenCalled();
-      expect(gteMock).toHaveBeenCalledWith("start_date", formattedDate);
-      expect(lteMock).toHaveBeenCalledWith("end_date", formattedDate);
-      expect(maybeSingleMock).toHaveBeenCalled();
+      expect(gteMock).toHaveBeenCalledWith("start_date", startOfDay);
+      expect(lteMock).toHaveBeenCalledWith("end_date", endOfDay);
     });
 
     it("should throw an error when getByDate fails", async () => {
+      // Arrange
       const mockError = { message: "Failed to fetch data" };
-      const formattedDate = "2022-01-01";
+      const inputDate = new Date("2025-01-01T10:00:00Z");
 
-      const maybeSingleMock = vi
-        .fn()
-        .mockResolvedValue({ data: null, error: mockError });
-      const lteMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
+      // Expected start and end of day
+      const formattedDate = inputDate.toISOString().split("T")[0];
+      const startOfDay = `${formattedDate}T00:00:00Z`;
+      const endOfDay = `${formattedDate}T23:59:59Z`;
+
+      // Mocking Supabase's chainable methods to simulate an error
+      const lteMock = vi.fn().mockReturnValue({
+        data: null,
+        error: mockError, // Error returned by Supabase
+      });
       const gteMock = vi.fn().mockReturnValue({ lte: lteMock });
       const selectMock = vi.fn().mockReturnValue({ gte: gteMock });
 
+      // Mock the "from" function in Supabase
       (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
 
-      await expect(
-        repository.getByDate(new Date(formattedDate)),
-      ).rejects.toThrow("Error fetching data: Failed to fetch data");
-      expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+      // Act & Assert
+      await expect(repository.getByDate(inputDate)).rejects.toThrow(
+        `Error fetching data: ${mockError.message}`,
+      ); // Ensure the error matches the expected message
+
+      // Additional assertions
+      expect(supabaseMock.from).toHaveBeenCalledWith("pharmacy_schedules");
       expect(selectMock).toHaveBeenCalled();
+      expect(gteMock).toHaveBeenCalledWith("start_date", startOfDay);
+      expect(lteMock).toHaveBeenCalledWith("end_date", endOfDay);
     });
   });
 });
