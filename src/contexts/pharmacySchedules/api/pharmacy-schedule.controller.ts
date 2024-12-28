@@ -50,54 +50,20 @@ export class PharmacyScheduleController extends BaseController<PharmacyScheduleM
   @CacheTTL(3600)
   @Get("byDate/:date")
   async getByDate(@Param("date") date: string) {
-    try {
-      // Parseamos la fecha desde el parámetro
-      const parsedDate = new Date(date);
+    // try {
+    // Parseamos la fecha desde el parámetro
+    const parsedDate = new Date(date);
 
-      // Verificamos si la fecha es válida
-      if (Number.isNaN(parsedDate.getTime())) {
-        return {
-          statusCode: 400,
-          message: "Invalid date format provided.",
-        };
-      }
-
-      // Llamamos al servicio
-      const result = await this.service.getByDate(parsedDate);
-
-      // Si no se encuentran farmacias, retornamos un 404
-      if (result.length === 0) {
-        return {
-          statusCode: 404,
-          message: "No pharmacies found for the provided date.",
-        };
-      }
-
-      // Si todo está bien, retornamos los resultados
-      return result;
-    } catch (error) {
-      // Manejamos errores internos
-      if (error instanceof Error) {
-        // Si el mensaje del error es de "No pharmacies found", retornamos un 404
-        if (error.message === "No pharmacies found for the provided date") {
-          return {
-            statusCode: 404,
-            message: error.message,
-          };
-        }
-
-        // En otros casos de error, retornamos un 500
-        return {
-          statusCode: 500,
-          message: `Internal server error: ${error.message}`,
-        };
-      }
-
-      // En caso de errores no esperados, también retornamos 500
+    // Verificamos si la fecha es válida
+    if (Number.isNaN(parsedDate.getTime())) {
       return {
-        statusCode: 500,
-        message: "Internal server error",
+        statusCode: 400,
+        message: "Invalid date format provided.",
       };
     }
+
+    // Llamamos al servicio
+    const result = await this.service.getByDate(parsedDate);
+    return result;
   }
 }

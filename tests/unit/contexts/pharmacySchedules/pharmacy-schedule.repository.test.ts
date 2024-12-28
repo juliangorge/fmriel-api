@@ -126,45 +126,57 @@ describe("PharmacyScheduleRepository", () => {
   describe("getByDate", () => {
     it("should fetch a pharmacy schedule by date (success)", async () => {
       const mockPharmacySchedule: PharmacySchedule = PharmacyScheduleMock;
-      const formattedDate = "2022-01-01";
+      const formattedDate = new Date();
 
-      const maybeSingleMock = vi
+      const lteMock = vi
         .fn()
-        .mockResolvedValue({ data: mockPharmacySchedule, error: null });
-      const lteMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
-      const gteMock = vi.fn().mockReturnValue({ lte: lteMock });
+        .mockReturnValue({ data: [mockPharmacySchedule], error: null });
+      const gteMock = vi.fn().mockReturnValue({
+        lte: lteMock,
+      });
       const selectMock = vi.fn().mockReturnValue({ gte: gteMock });
 
+      // Mock de la función from de supabase
       (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
 
       // Act
-      const result = await repository.getByDate(new Date(formattedDate));
+      const result = await repository.getByDate(formattedDate);
 
       // Assert
-      expect(result).toEqual(mockPharmacySchedule);
+      expect(result).toEqual([mockPharmacySchedule]); // Asegúrate de que es un array
       expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
       expect(selectMock).toHaveBeenCalled();
-      expect(gteMock).toHaveBeenCalledWith("start_date", formattedDate);
-      expect(lteMock).toHaveBeenCalledWith("end_date", formattedDate);
-      expect(maybeSingleMock).toHaveBeenCalled();
+      expect(gteMock).toHaveBeenCalledWith(
+        "start_date",
+        formattedDate.toISOString(),
+      );
+      expect(lteMock).toHaveBeenCalledWith(
+        "end_date",
+        formattedDate.toISOString(),
+      );
     });
 
     it("should throw an error when getByDate fails", async () => {
       const mockError = { message: "Failed to fetch data" };
       const formattedDate = "2022-01-01";
 
+      // Simulando un error en la respuesta
       const maybeSingleMock = vi
         .fn()
-        .mockResolvedValue({ data: null, error: mockError });
+        .mockResolvedValue({ data: null, error: mockError }); // No hay datos, pero hay un error
+
+      // Mocking los métodos gte, lte y select
       const lteMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
       const gteMock = vi.fn().mockReturnValue({ lte: lteMock });
       const selectMock = vi.fn().mockReturnValue({ gte: gteMock });
 
+      // Mock de la función from de supabase
       (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
 
+      // Act & Assert
       await expect(
         repository.getByDate(new Date(formattedDate)),
-      ).rejects.toThrow("Error fetching data: Failed to fetch data");
+      ).rejects.toThrow("Error fetching data: Failed to fetch data"); // Esperamos que se lance el error
       expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
       expect(selectMock).toHaveBeenCalled();
     });
