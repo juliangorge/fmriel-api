@@ -125,9 +125,18 @@ describe("PharmacyScheduleRepository", () => {
 
   describe("getByDate", () => {
     it("should fetch a pharmacy schedule by date (success)", async () => {
-      const mockPharmacySchedule: PharmacySchedule = PharmacyScheduleMock;
-      const formattedDate = new Date();
+      // Arrange
+      const mockPharmacySchedule = PharmacyScheduleMock;
 
+      // The input date to be tested
+      const inputDate = new Date("2025-01-01T10:00:00Z");
+
+      // Expected start and end of day
+      const formattedDate = inputDate.toISOString().split("T")[0];
+      const startOfDay = `${formattedDate}T00:00:00Z`;
+      const endOfDay = `${formattedDate}T23:59:59Z`;
+
+      // Mocking Supabase methods
       const lteMock = vi
         .fn()
         .mockReturnValue({ data: [mockPharmacySchedule], error: null });
@@ -136,49 +145,51 @@ describe("PharmacyScheduleRepository", () => {
       });
       const selectMock = vi.fn().mockReturnValue({ gte: gteMock });
 
-      // Mock de la función from de supabase
+      // Mock the "from" function in supabase
       (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
 
       // Act
-      const result = await repository.getByDate(formattedDate);
+      const result = await repository.getByDate(inputDate);
 
       // Assert
-      expect(result).toEqual([mockPharmacySchedule]); // Asegúrate de que es un array
-      expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+      expect(result).toEqual([mockPharmacySchedule]);
+      expect(supabaseMock.from).toHaveBeenCalledWith("pharmacy_schedules");
       expect(selectMock).toHaveBeenCalled();
-      expect(gteMock).toHaveBeenCalledWith(
-        "start_date",
-        formattedDate.toISOString(),
-      );
-      expect(lteMock).toHaveBeenCalledWith(
-        "end_date",
-        formattedDate.toISOString(),
-      );
+      expect(gteMock).toHaveBeenCalledWith("start_date", startOfDay);
+      expect(lteMock).toHaveBeenCalledWith("end_date", endOfDay);
     });
 
     it("should throw an error when getByDate fails", async () => {
+      // Arrange
       const mockError = { message: "Failed to fetch data" };
-      const formattedDate = "2022-01-01";
+      const inputDate = new Date("2025-01-01T10:00:00Z");
 
-      // Simulando un error en la respuesta
-      const maybeSingleMock = vi
-        .fn()
-        .mockResolvedValue({ data: null, error: mockError }); // No hay datos, pero hay un error
+      // Expected start and end of day
+      const formattedDate = inputDate.toISOString().split("T")[0];
+      const startOfDay = `${formattedDate}T00:00:00Z`;
+      const endOfDay = `${formattedDate}T23:59:59Z`;
 
-      // Mocking los métodos gte, lte y select
-      const lteMock = vi.fn().mockReturnValue({ maybeSingle: maybeSingleMock });
+      // Mocking Supabase's chainable methods to simulate an error
+      const lteMock = vi.fn().mockReturnValue({
+        data: null,
+        error: mockError, // Error returned by Supabase
+      });
       const gteMock = vi.fn().mockReturnValue({ lte: lteMock });
       const selectMock = vi.fn().mockReturnValue({ gte: gteMock });
 
-      // Mock de la función from de supabase
+      // Mock the "from" function in Supabase
       (supabaseMock.from as Mock).mockReturnValue({ select: selectMock });
 
       // Act & Assert
-      await expect(
-        repository.getByDate(new Date(formattedDate)),
-      ).rejects.toThrow("Error fetching data: Failed to fetch data"); // Esperamos que se lance el error
-      expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
+      await expect(repository.getByDate(inputDate)).rejects.toThrow(
+        `Error fetching data: ${mockError.message}`,
+      ); // Ensure the error matches the expected message
+
+      // Additional assertions
+      expect(supabaseMock.from).toHaveBeenCalledWith("pharmacy_schedules");
       expect(selectMock).toHaveBeenCalled();
+      expect(gteMock).toHaveBeenCalledWith("start_date", startOfDay);
+      expect(lteMock).toHaveBeenCalledWith("end_date", endOfDay);
     });
   });
 });

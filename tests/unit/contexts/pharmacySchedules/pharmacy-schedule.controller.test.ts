@@ -62,6 +62,18 @@ describe("PharmacyScheduleController", () => {
   });
 
   describe("getByDate", () => {
+    it("should return 400 if an invalid date is provided", async () => {
+      const invalidDate = "invalid-date";
+
+      const response = await controller.getByDate(invalidDate);
+
+      expect(response).toEqual({
+        statusCode: 400,
+        message: "Invalid date format provided.",
+      });
+      expect(service.getByDate).not.toHaveBeenCalled();
+    });
+
     it("should get pharmacy schedules by date", async () => {
       const result = [PharmacyScheduleMock];
       vi.spyOn(service, "getByDate").mockResolvedValue(result as never);

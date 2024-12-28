@@ -50,7 +50,6 @@ export class PharmacyScheduleController extends BaseController<PharmacyScheduleM
   @CacheTTL(3600)
   @Get("byDate/:date")
   async getByDate(@Param("date") date: string) {
-    // try {
     // Parseamos la fecha desde el parámetro
     const parsedDate = new Date(date);
 
