@@ -50,11 +50,10 @@ export class AuthController {
       throw new Error("Missing access token.");
     }
 
-    const userInfo =
-      await this.authService.verifyGoogleAccessToken(providerToken);
+    const user = await this.authService.verifyGoogleAccessToken(providerToken);
 
     return {
-      userInfo,
+      user,
       accessToken,
       refreshToken,
       tokenType,
