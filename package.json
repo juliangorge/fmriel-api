@@ -70,7 +70,7 @@
     "@commitlint/types": "^19.5.0",
     "@nestjs/schematics": "^10.2.3",
     "@nestjs/testing": "^10.4.9",
-    "@swc/cli": "^0.5.1",
+    "@swc/cli": "^0.5.2",
     "@swc/core": "^1.9.3",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^22.10.2",
