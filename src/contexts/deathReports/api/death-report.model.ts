@@ -3,9 +3,9 @@ export interface DeathReport {
   name: string;
   surname: string;
   age: number;
-  date_of_death: Date;
+  date_of_death: string;
   place_of_death?: string;
   funeral_location?: string;
-  funeral_date?: Date;
+  funeral_date?: string;
   photo_url?: string;
 }

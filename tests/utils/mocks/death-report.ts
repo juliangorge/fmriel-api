@@ -3,5 +3,5 @@ export const DeathReportMock = {
   name: "John",
   surname: "Doe",
   age: 30,
-  date_of_death: new Date("2021-01-01"),
+  date_of_death: "2021-01-01",
 };

@@ -1,5 +1,4 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Transform } from "class-transformer";
 import {
   IsInt,
   IsNotEmpty,
@@ -33,13 +32,11 @@ export class CreateDeathReportDto {
   age!: number;
 
   @ApiProperty({
-    description: "The date of death",
+    description: "The date of death (AAA-MM-DD format))",
     example: "2024-12-01",
   })
   @IsString()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument
-  @Transform(({ value }) => (value ? new Date(value) : value))
-  date_of_death!: Date;
+  date_of_death!: string;
 
   @ApiProperty({
     description: "The place of death (optional)",
@@ -60,14 +57,13 @@ export class CreateDeathReportDto {
   funeral_location?: string;
 
   @ApiProperty({
-    description: "The funeral date (optional)",
+    description: "The funeral date (optional, AAA-MM-DD format)",
     required: false,
     example: "2024-12-03",
   })
   @IsOptional()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument
-  @Transform(({ value }) => (value ? new Date(value) : value))
-  funeral_date?: Date;
+  @IsString()
+  funeral_date?: string;
 
   @ApiProperty({
     description: "The URL to the deceased's photo (optional)",
@@ -108,14 +104,13 @@ export class UpdateDeathReportDto {
   age?: number;
 
   @ApiProperty({
-    description: "The date of death",
+    description: "The date of death (optional, AAA-MM-DD format)",
     required: false,
     example: "2024-12-01",
   })
   @IsOptional()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument
-  @Transform(({ value }) => (value ? new Date(value) : value))
-  date_of_death?: Date;
+  @IsString()
+  date_of_death?: string;
 
   @ApiProperty({
     description: "The place of death (optional)",
@@ -136,14 +131,13 @@ export class UpdateDeathReportDto {
   funeral_location?: string;
 
   @ApiProperty({
-    description: "The funeral date (optional)",
+    description: "The funeral date (optional, AAA-MM-DD format)",
     required: false,
-    example: "2024-12-03", // Fecha sin hora, ajustada al formato que necesitas
+    example: "2024-12-03",
   })
   @IsOptional()
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-argument
-  @Transform(({ value }) => (value ? new Date(value) : value)) // Convierte el string en un objeto Date
-  funeral_date?: Date;
+  @IsString()
+  funeral_date?: string;
 
   @ApiProperty({
     description: "The URL to the deceased's photo (optional)",
