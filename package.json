@@ -52,7 +52,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-fastify": "^10.4.15",
     "@nestjs/swagger": "^8.1.0",
-    "@supabase/supabase-js": "^2.46.1",
+    "@supabase/supabase-js": "^2.47.10",
     "axios": "^1.7.9",
     "cache-manager": "^5.7.6",
     "class-transformer": "^0.5.1",
