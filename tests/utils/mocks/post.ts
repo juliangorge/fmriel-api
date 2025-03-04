@@ -1,7 +1,7 @@
 export const PostMock = {
   id: 1,
   title: "Title",
-  section_id: 1,
+  category_id: 1,
   subtitle: "Subtitle",
   summary: "Summary",
   body: "Body",

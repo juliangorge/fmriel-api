@@ -16,7 +16,7 @@ export class CreatePostDto {
   })
   @IsNumber()
   @IsNotEmpty()
-  section_id!: number;
+  category_id!: number;
 
   @ApiProperty({
     description: "Subtitle of the post",
@@ -95,7 +95,7 @@ export class UpdatePostDto {
   })
   @IsOptional()
   @IsNumber()
-  section_id?: number;
+  category_id?: number;
 
   @ApiProperty({
     description: "Subtitle of the post",

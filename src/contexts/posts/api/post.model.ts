@@ -1,7 +1,7 @@
 export interface Post {
   id: number;
   title: string;
-  section_id: number;
+  category_id: number;
   subtitle?: string;
   summary: string;
   body: string;
