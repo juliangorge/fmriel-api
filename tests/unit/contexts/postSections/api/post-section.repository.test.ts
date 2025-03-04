@@ -14,7 +14,7 @@ describe("PostSectionRepository", () => {
   let repository: PostSectionRepository;
   let supabaseMock: SupabaseClient;
   let supabaseProviderMock: SupabaseProvider;
-  const tableName = "post_sections";
+  const tableName = "post_categories";
 
   beforeEach(() => {
     // Mock supabase client

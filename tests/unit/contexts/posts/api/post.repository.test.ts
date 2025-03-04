@@ -96,7 +96,7 @@ describe("PostRepository", () => {
       // Assert
       expect(result).toEqual(mockPost);
       expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-      expect(selectMock).toHaveBeenCalledWith("*, post_sections(name)");
+      expect(selectMock).toHaveBeenCalledWith("*, post_categories(name)");
       expect(eqMock).toHaveBeenCalledWith("id", 1);
       expect(maybeSingleMock).toHaveBeenCalled();
     });
@@ -116,7 +116,7 @@ describe("PostRepository", () => {
         "Error fetching data: Failed to fetch data",
       );
       expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-      expect(selectMock).toHaveBeenCalledWith("*, post_sections(name)");
+      expect(selectMock).toHaveBeenCalledWith("*, post_categories(name)");
     });
   });
 
@@ -135,7 +135,7 @@ describe("PostRepository", () => {
       // Assert
       expect(result).toEqual(mockData);
       expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-      expect(selectMock).toHaveBeenCalledWith("*, post_sections(name)");
+      expect(selectMock).toHaveBeenCalledWith("*, post_categories(name)");
     });
 
     it("should throw an error when getHighlights fails", async () => {
@@ -151,7 +151,7 @@ describe("PostRepository", () => {
       );
 
       expect(supabaseMock.from).toHaveBeenCalledWith(tableName);
-      expect(selectMock).toHaveBeenCalledWith("*, post_sections(name)");
+      expect(selectMock).toHaveBeenCalledWith("*, post_categories(name)");
     });
   });
 
@@ -173,7 +173,9 @@ describe("PostRepository", () => {
       expect(result).toEqual(expected);
 
       expect(supabaseMock.from).toHaveBeenCalledWith("highlight_posts");
-      expect(selectMock).toHaveBeenCalledWith("posts(*, post_sections(name))");
+      expect(selectMock).toHaveBeenCalledWith(
+        "posts(*, post_categories(name))",
+      );
     });
 
     it("should throw an error when getMainHighlights fails", async () => {
@@ -189,7 +191,9 @@ describe("PostRepository", () => {
       );
 
       expect(supabaseMock.from).toHaveBeenCalledWith("highlight_posts");
-      expect(selectMock).toHaveBeenCalledWith("posts(*, post_sections(name))");
+      expect(selectMock).toHaveBeenCalledWith(
+        "posts(*, post_categories(name))",
+      );
     });
   });
 });

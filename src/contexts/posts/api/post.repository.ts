@@ -16,7 +16,7 @@ export class PostRepository extends BaseRepository<Post> {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select("*, post_sections(name)")
+      .select("*, post_categories(name)")
       .eq("id", id)
       .maybeSingle();
     if (error) throw new Error(`Error fetching data: ${error.message}`);
@@ -26,7 +26,7 @@ export class PostRepository extends BaseRepository<Post> {
   async getHighlights(): Promise<Post[]> {
     const { data, error } = await this.supabase
       .from(this.tableName)
-      .select("*, post_sections(name)");
+      .select("*, post_categories(name)");
     //.order("created_at", { ascending: false });
     if (error) throw new Error(`Error fetching data: ${error.message}`);
     return data as Post[];
@@ -35,7 +35,7 @@ export class PostRepository extends BaseRepository<Post> {
   async getMainHighlights(): Promise<Post[]> {
     const { data, error } = await this.supabase
       .from("highlight_posts")
-      .select("posts(*, post_sections(name))");
+      .select("posts(*, post_categories(name))");
 
     if (error) throw new Error(`Error fetching data: ${error.message}`);
 

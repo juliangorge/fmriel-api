@@ -9,6 +9,6 @@ import { PostSection } from "./post-section.model";
 @Injectable()
 export class PostSectionRepository extends BaseRepository<PostSection> {
   constructor(protected supabaseProvider: SupabaseProvider) {
-    super(supabaseProvider, "post_sections");
+    super(supabaseProvider, "post_categories");
   }
 }
