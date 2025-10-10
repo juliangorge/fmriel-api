@@ -14,7 +14,14 @@ export const createVitestTestConfig = (testingType: string): InlineConfig => {
       reporter: ["text", "json", "html"],
       reportsDirectory: `coverage/${testingType}`,
       include: ["src/**/*.ts"],
-      exclude: ["src/main.ts"],
+      exclude: [
+        "src/main.ts",
+        "src/**/*.module.ts",
+        "src/**/*.dto.ts",
+        "src/**/*.model.ts",
+        "src/**/strategies/*.ts",
+        "src/**/guards/*.ts",
+      ],
     },
   };
 };

@@ -20,7 +20,7 @@ export class PostSectionController extends BaseController<PostSectionModel> {
 
   @Post()
   async create(@Body() createDto: CreatePostSectionDto) {
-    await validateDto(createDto);
+    await validateDto(CreatePostSectionDto, createDto);
     return this.baseService.create(createDto);
   }
 
@@ -29,7 +29,7 @@ export class PostSectionController extends BaseController<PostSectionModel> {
     @Param("id") id: number,
     @Body() updateDto: UpdatePostSectionDto,
   ) {
-    await validateDto(updateDto);
+    await validateDto(UpdatePostSectionDto, updateDto);
     return this.baseService.update(id, updateDto);
   }
 }

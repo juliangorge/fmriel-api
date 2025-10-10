@@ -33,7 +33,7 @@ export class PharmacyScheduleController extends BaseController<PharmacyScheduleM
 
   @Post()
   async create(@Body() createDto: CreatePharmacyScheduleDto) {
-    await validateDto(createDto);
+    await validateDto(CreatePharmacyScheduleDto, createDto);
     return this.baseService.create(createDto);
   }
 
@@ -42,7 +42,7 @@ export class PharmacyScheduleController extends BaseController<PharmacyScheduleM
     @Param("id") id: number,
     @Body() updateDto: UpdatePharmacyScheduleDto,
   ) {
-    await validateDto(updateDto);
+    await validateDto(UpdatePharmacyScheduleDto, updateDto);
     return this.baseService.update(id, updateDto);
   }
 

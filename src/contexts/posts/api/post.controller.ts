@@ -31,13 +31,13 @@ export class PostController extends BaseController<PostModel> {
 
   @Post()
   async create(@Body() createDto: CreatePostDto) {
-    await validateDto(createDto);
+    await validateDto(CreatePostDto, createDto);
     return this.baseService.create(createDto);
   }
 
   @Put(":id")
   async update(@Param("id") id: number, @Body() updateDto: UpdatePostDto) {
-    await validateDto(updateDto);
+    await validateDto(UpdatePostDto, updateDto);
     return this.baseService.update(id, updateDto);
   }
 

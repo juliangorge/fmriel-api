@@ -20,13 +20,13 @@ export class PharmacyController extends BaseController<PharmacyModel> {
 
   @Post()
   async create(@Body() createDto: CreatePharmacyDto) {
-    await validateDto(createDto);
+    await validateDto(CreatePharmacyDto, createDto);
     return this.baseService.create(createDto);
   }
 
   @Put(":id")
   async update(@Param("id") id: number, @Body() updateDto: UpdatePharmacyDto) {
-    await validateDto(updateDto);
+    await validateDto(UpdatePharmacyDto, updateDto);
     return this.baseService.update(id, updateDto);
   }
 }

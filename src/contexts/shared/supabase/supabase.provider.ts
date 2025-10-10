@@ -18,7 +18,7 @@ export class SupabaseProvider {
           Authorization: `Bearer ${accessToken}`,
         },
       },
-    });
+    }) as SupabaseClient;
   }
 
   getClient(): SupabaseClient {

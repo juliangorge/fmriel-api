@@ -20,13 +20,13 @@ export class RainCityController extends BaseController<RainCityModel> {
 
   @Post()
   async create(@Body() createDto: CreateRainCityDto) {
-    await validateDto(createDto);
+    await validateDto(CreateRainCityDto, createDto);
     return this.baseService.create(createDto);
   }
 
   @Put(":id")
   async update(@Param("id") id: number, @Body() updateDto: UpdateRainCityDto) {
-    await validateDto(updateDto);
+    await validateDto(UpdateRainCityDto, updateDto);
     return this.baseService.update(id, updateDto);
   }
 }

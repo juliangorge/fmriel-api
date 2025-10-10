@@ -47,7 +47,7 @@ describe("validateDto utility (basic)", () => {
     validDto.email = "john@example.com";
 
     // `validateDto` should resolve without throwing any exception
-    await expect(validateDto(validDto)).resolves.not.toThrow();
+    await expect(validateDto(CreateUserDto, validDto)).resolves.not.toThrow();
   });
 
   it("should throw BadRequestException if DTO validation fails", async () => {
@@ -57,7 +57,9 @@ describe("validateDto utility (basic)", () => {
     invalidDto.email = "not-an-email";
 
     // Expect the function to reject with BadRequestException
-    await expect(validateDto(invalidDto)).rejects.toThrow(BadRequestException);
+    await expect(validateDto(CreateUserDto, invalidDto)).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it("should combine multiple errors into one message (flatMap test)", async () => {
@@ -67,7 +69,7 @@ describe("validateDto utility (basic)", () => {
     invalidDto.email = "invalid";
 
     try {
-      await validateDto(invalidDto);
+      await validateDto(CreateUserDto, invalidDto);
       // If we reach here, then no error was thrown (unexpected)
       expect.fail("Expected validateDto to throw BadRequestException");
     } catch (error) {
@@ -87,9 +89,9 @@ describe("validateDto utility (nested DTO for full .flatMap coverage)", () => {
     userWithNoAddress.name = "Alice";
     // userWithNoAddress.address = undefined; // property is missing
 
-    await expect(validateDto(userWithNoAddress)).rejects.toThrow(
-      BadRequestException,
-    );
+    await expect(
+      validateDto(UserWithAddressDto, userWithNoAddress),
+    ).rejects.toThrow(BadRequestException);
   });
 
   it("should fail when the child DTO (address) is missing required fields", async () => {
@@ -99,8 +101,8 @@ describe("validateDto utility (nested DTO for full .flatMap coverage)", () => {
     userWithEmptyStreet.address = new AddressDto();
     userWithEmptyStreet.address.street = "";
 
-    await expect(validateDto(userWithEmptyStreet)).rejects.toThrow(
-      BadRequestException,
-    );
+    await expect(
+      validateDto(UserWithAddressDto, userWithEmptyStreet),
+    ).rejects.toThrow(BadRequestException);
   });
 });

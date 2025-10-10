@@ -20,7 +20,7 @@ export class DeathReportController extends BaseController<DeathReportModel> {
 
   @Post()
   async create(@Body() createDto: CreateDeathReportDto) {
-    await validateDto(createDto);
+    await validateDto(CreateDeathReportDto, createDto);
     return this.baseService.create(createDto);
   }
 
@@ -29,7 +29,7 @@ export class DeathReportController extends BaseController<DeathReportModel> {
     @Param("id") id: number,
     @Body() updateDto: UpdateDeathReportDto,
   ) {
-    await validateDto(updateDto);
+    await validateDto(UpdateDeathReportDto, updateDto);
     return this.baseService.update(id, updateDto);
   }
 }
